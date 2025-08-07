@@ -10,8 +10,6 @@ namespace DataAccessLayer
 
         public DbSet<Person> Persons { get; set; }
 
-        protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder) { }
-
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
             modelBuilder
