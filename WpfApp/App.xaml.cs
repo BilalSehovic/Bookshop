@@ -39,6 +39,10 @@ public partial class App : Application
         mainWindow.Show();
 
         base.OnStartup(e);
+
+        //using var scope = AppHost.Services.CreateScope();
+        //var mainWindow = scope.ServiceProvider.GetRequiredService<MainWindow>();
+        //mainWindow.Show();
     }
 
     protected override async void OnExit(ExitEventArgs e)

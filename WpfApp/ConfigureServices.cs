@@ -14,13 +14,14 @@ public static class ConfigureServices
         IConfiguration config = context.Configuration;
 
         // Connection string from appsettings or user secrets
-        var connectionString = config.GetValue<string>("DefaultConnection");
+        var connectionString = config.GetConnectionString("DefaultConnection");
 
         // DbContext
         services.AddDbContext<AppDbContext>(options => options.UseNpgsql(connectionString));
 
         services.AddScoped<IPersonRepository, PersonRepository>();
+        services.AddScoped<IBookRepository, BookRepository>();
 
-        services.AddSingleton<MainWindow>();
+        services.AddScoped<MainWindow>();
     }
 }
