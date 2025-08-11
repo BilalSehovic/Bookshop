@@ -13,9 +13,6 @@ public partial class App : Application
 {
     private IHost? _host;
 
-    //public static IConfiguration Configuration =>
-    //    AppHost.Services.GetRequiredService<IConfiguration>();
-
     protected override async void OnStartup(StartupEventArgs e)
     {
         _host = Host.CreateDefaultBuilder()
@@ -24,8 +21,7 @@ public partial class App : Application
                 {
                     config.SetBasePath(Directory.GetCurrentDirectory());
                     config.AddJsonFile("appsettings.json", optional: false, reloadOnChange: true);
-                    if (context.HostingEnvironment.IsDevelopment())
-                        config.AddUserSecrets<App>();
+                    config.AddUserSecrets<App>();
                 }
             )
             .ConfigureServices(ConfigureServices.AddServices)
