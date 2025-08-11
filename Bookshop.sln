@@ -7,6 +7,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "DataAccessLayer", "DataAcce
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "WpfApp", "WpfApp\WpfApp.csproj", "{369E2177-EC4D-478A-AA6C-04415CCAEA13}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "BookshopWpf.Tests", "BookshopWpf.Tests\BookshopWpf.Tests.csproj", "{D702CCB0-3CF2-4846-85B9-5866ABC7C721}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -21,6 +23,10 @@ Global
 		{369E2177-EC4D-478A-AA6C-04415CCAEA13}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{369E2177-EC4D-478A-AA6C-04415CCAEA13}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{369E2177-EC4D-478A-AA6C-04415CCAEA13}.Release|Any CPU.Build.0 = Release|Any CPU
+		{D702CCB0-3CF2-4846-85B9-5866ABC7C721}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{D702CCB0-3CF2-4846-85B9-5866ABC7C721}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{D702CCB0-3CF2-4846-85B9-5866ABC7C721}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{D702CCB0-3CF2-4846-85B9-5866ABC7C721}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

@@ -201,4 +201,18 @@ Backup*/
 UpgradeLog*.XML
 UpgradeLog*.htm
 
-# SQL Ser
+## Test-specific ignores
+
+# Test results
+TestResults/
+[Tt]est[Rr]esult*/
+
+# Coverage reports
+coverage/
+*.coverage
+*.coveragexml
+*.cobertura.xml
+
+# Test output
+*.trx
+*.tmp
