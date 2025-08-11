@@ -1,6 +1,11 @@
-<UserControl x:Class="WpfApp.Views.SalesReportView"
+<UserControl x:Class="BookshopWpf.Views.SalesReportView"
              xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
-             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:converters="clr-namespace:WpfApp.Converters">
+    <UserControl.Resources>
+        <converters:UtcToLocalTimeConverter x:Key="UtcToLocalTimeConverter"/>
+    </UserControl.Resources>
+
     <Grid>
         <Grid.RowDefinitions>
             <RowDefinition Height="Auto"/>
@@ -30,12 +35,9 @@
                   CanUserAddRows="False" IsReadOnly="True" Margin="10">
             <DataGrid.Columns>
                 <!--<DataGridTextColumn Header="Sale ID" Binding="{Binding Id}" Width="70"/>-->
-                <DataGridTextColumn Header="Book Title" Binding="{Binding BookDescription}" Width="450"/>
-                <!--<DataGridTextColumn Header="Book Title" Binding="{Binding Book.Title}" Width="200"/>
-                <DataGridTextColumn Header="Author" Binding="{Binding Book.Author}" Width="150"/>
-                <DataGridTextColumn Header="ISBN" Binding="{Binding Book.Isbn}" Width="120"/>-->
+                <DataGridTextColumn Header="Book Information" Binding="{Binding BookDescription}" Width="450"/>
                 <DataGridTextColumn Header="Sale Price" Binding="{Binding UnitPrice, StringFormat=C}" Width="100"/>
-                <DataGridTextColumn Header="Sale Time" Binding="{Binding SaleDate, StringFormat=HH:mm:ss}" Width="100"/>
+                <DataGridTextColumn Header="Sale Time" Binding="{Binding SaleDate, Converter={StaticResource UtcToLocalTimeConverter}, StringFormat=HH:mm:ss}" Width="100"/>
                 <DataGridTextColumn Header="Quantity" Binding="{Binding Quantity}" Width="80"/>
             </DataGrid.Columns>
         </DataGrid>

@@ -26,7 +26,7 @@ public class SalesViewModel : ViewModelBase
         );
         LoadBooksCommand = new RelayCommand(async () => await LoadAvailableBooksAsync());
 
-        Task.Run(async () => await LoadAvailableBooksAsync());
+        LoadAvailableBooksAsync();
     }
 
     public ObservableCollection<Book> Books
@@ -92,36 +92,30 @@ public class SalesViewModel : ViewModelBase
         {
             var books = await _bookService.GetAllBooksAsync();
 
-            Application.Current.Dispatcher.Invoke(() =>
+            Books.Clear();
+            foreach (var book in books)
             {
-                Books.Clear();
-                foreach (var book in books.OrderBy(b => b.Title))
-                {
-                    Books.Add(book);
-                }
+                Books.Add(book);
+            }
 
-                var inStockCount = books.Count(b => b.StockQuantity > 0);
-                var outOfStockCount = books.Count(b => b.StockQuantity == 0);
+            var inStockCount = books.Count(b => b.StockQuantity > 0);
+            var outOfStockCount = books.Count(b => b.StockQuantity == 0);
 
-                StatusText =
-                    $"{books.Count} books total ({inStockCount} in stock, {outOfStockCount} out of stock).";
+            StatusText =
+                $"{books.Count} books total ({inStockCount} in stock, {outOfStockCount} out of stock).";
 
-                if (books.Count == 0)
-                    StatusText = "No books in inventory.";
-            });
+            if (books.Count == 0)
+                StatusText = "No books in inventory.";
         }
         catch (Exception ex)
         {
-            Application.Current.Dispatcher.Invoke(() =>
-            {
-                MessageBox.Show(
-                    $"Error loading books: {ex.Message}",
-                    "Error",
-                    MessageBoxButton.OK,
-                    MessageBoxImage.Error
-                );
-                StatusText = "Error loading books.";
-            });
+            MessageBox.Show(
+                $"Error loading books: {ex.Message}",
+                "Error",
+                MessageBoxButton.OK,
+                MessageBoxImage.Error
+            );
+            StatusText = "Error loading books.";
         }
     }
 
@@ -275,6 +269,6 @@ public class SalesViewModel : ViewModelBase
     public void RefreshView()
     {
         ClearSelection();
-        Task.Run(async () => await LoadAvailableBooksAsync());
+        LoadAvailableBooksAsync();
     }
 }

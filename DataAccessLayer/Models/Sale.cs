@@ -7,7 +7,7 @@ public class Sale : BaseEntity
     public Guid? BookId { get; set; }
 
     [Required]
-    public DateTime SaleDate { get; set; } = DateTime.Now;
+    public DateTime SaleDate { get; set; } = DateTime.UtcNow;
 
     public string BookDescription { get; set; }
 

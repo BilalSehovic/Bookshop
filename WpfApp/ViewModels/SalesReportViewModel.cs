@@ -28,7 +28,7 @@ public class SalesReportViewModel : ViewModelBase
         ExportCsvCommand = new RelayCommand(ExportCsv, () => IsExportEnabled);
         LoadReportCommand = new RelayCommand(async () => await LoadReportAsync());
 
-        Task.Run(async () => await LoadReportAsync());
+        LoadReportAsync();
     }
 
     public DateTime SelectedDate
@@ -39,7 +39,7 @@ public class SalesReportViewModel : ViewModelBase
             if (SetProperty(ref _selectedDate, value))
             {
                 SelectedDateText = value.ToString("dd-MM-yyyy");
-                Task.Run(async () => await LoadReportAsync());
+                LoadReportAsync();
             }
         }
     }
@@ -101,30 +101,24 @@ public class SalesReportViewModel : ViewModelBase
         {
             var sales = await _bookService.GetSalesByDateAsync(SelectedDate);
 
-            Application.Current.Dispatcher.Invoke(() =>
+            Sales.Clear();
+            foreach (var sale in sales)
             {
-                Sales.Clear();
-                foreach (var sale in sales)
-                {
-                    Sales.Add(sale);
-                }
+                Sales.Add(sale);
+            }
 
-                UpdateSummary(sales.ToList());
-                IsExportEnabled = sales.Any();
-            });
+            UpdateSummary(sales.ToList());
+            IsExportEnabled = sales.Any();
         }
         catch (Exception ex)
         {
-            Application.Current.Dispatcher.Invoke(() =>
-            {
-                MessageBox.Show(
-                    $"Error loading sales report: {ex.Message}",
-                    "Error",
-                    MessageBoxButton.OK,
-                    MessageBoxImage.Error
-                );
-                ClearReport();
-            });
+            MessageBox.Show(
+                $"Error loading sales report: {ex.Message}",
+                "Error",
+                MessageBoxButton.OK,
+                MessageBoxImage.Error
+            );
+            ClearReport();
         }
     }
 
@@ -198,10 +192,13 @@ public class SalesReportViewModel : ViewModelBase
 
         foreach (var sale in Sales)
         {
-            var bookDescription = EscapeCsvField(sale.BookDescription ?? "");
+            var bookTitle = EscapeCsvField(sale.Book?.Title ?? "");
+            var author = EscapeCsvField(sale.Book?.Author ?? "");
+            var isbn = EscapeCsvField(sale.Book?.Isbn ?? "");
             var salePrice = sale.UnitPrice.ToString("F2", CultureInfo.InvariantCulture);
-            var saleDate = sale.SaleDate.ToString("yyyy-MM-dd", CultureInfo.InvariantCulture);
-            var saleTime = sale.SaleDate.ToString("HH:mm:ss", CultureInfo.InvariantCulture);
+            var localSaleDate = sale.SaleDate.ToLocalTime();
+            var saleDate = localSaleDate.ToString("dd-MM-yyyy", CultureInfo.InvariantCulture);
+            var saleTime = localSaleDate.ToString("HH:mm:ss", CultureInfo.InvariantCulture);
             var quantity = sale.Quantity.ToString(CultureInfo.InvariantCulture);
             var total = (sale.UnitPrice * sale.Quantity).ToString(
                 "F2",
@@ -209,7 +206,7 @@ public class SalesReportViewModel : ViewModelBase
             );
 
             csv.AppendLine(
-                $"{bookDescription},{salePrice},{saleDate},{saleTime},{quantity},{total}"
+                $"{bookTitle},{author},{isbn},{salePrice},{saleDate},{saleTime},{quantity},{total}"
             );
         }
 
@@ -236,6 +233,6 @@ public class SalesReportViewModel : ViewModelBase
 
     public void RefreshReport()
     {
-        Task.Run(async () => await LoadReportAsync());
+        LoadReportAsync();
     }
 }

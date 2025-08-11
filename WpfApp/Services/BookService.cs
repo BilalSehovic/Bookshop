@@ -26,10 +26,7 @@ public class BookService : IBookService
 
     public async Task<List<Book>> GetAllBooksAsync()
     {
-        return await _context
-            .Books.OrderByDescending(b => b.CreatedAt)
-            .ThenBy(b => b.Title)
-            .ToListAsync();
+        return await _context.Books.OrderBy(b => b.Title).ToListAsync();
     }
 
     public async Task<Book?> GetBookByIdAsync(Guid id)
@@ -86,12 +83,16 @@ public class BookService : IBookService
 
     public async Task<List<Sale>> GetSalesByDateAsync(DateTime date)
     {
-        var startDate = DateTime.SpecifyKind(date.Date, DateTimeKind.Utc);
-        var endDate = startDate.AddDays(1);
+        // Convert the local date to UTC range for the entire day
+        var localStartDate = date.Date; // Start of selected day in local time
+        var localEndDate = localStartDate.AddDays(1); // End of selected day in local time
+
+        var utcStartDate = localStartDate.ToUniversalTime();
+        var utcEndDate = localEndDate.ToUniversalTime();
 
         return await _context
             .Sales.Include(s => s.Book)
-            .Where(s => s.SaleDate >= startDate && s.SaleDate < endDate)
+            .Where(s => s.SaleDate >= utcStartDate && s.SaleDate < utcEndDate)
             .OrderBy(s => s.SaleDate)
             .ToListAsync();
     }

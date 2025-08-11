@@ -1,0 +1,13 @@
+{
+  "methodDisplay": "method",
+  "methodDisplayOptions": {
+    "displayName": "FullyQualifiedName",
+    "displayParameters": true
+  },
+  "parallelizeTestCollections": true,
+  "parallelizeAssembly": true,
+  "maxParallelThreads": 4,
+  "preEnumerateTheories": true,
+  "shadowCopy": false,
+  "stopOnFail": false
+}

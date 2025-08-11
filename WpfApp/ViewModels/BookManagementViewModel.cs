@@ -33,7 +33,7 @@ public class BookManagementViewModel : ViewModelBase
         );
         ClearCommand = new RelayCommand(ClearForm);
 
-        Task.Run(async () => await LoadBooksAsync());
+        LoadBooksAsync();
     }
 
     public ObservableCollection<Book> Books
@@ -129,26 +129,20 @@ public class BookManagementViewModel : ViewModelBase
         {
             var books = await _bookService.GetAllBooksAsync();
 
-            Application.Current.Dispatcher.Invoke(() =>
+            Books.Clear();
+            foreach (var book in books)
             {
-                Books.Clear();
-                foreach (var book in books)
-                {
-                    Books.Add(book);
-                }
-            });
+                Books.Add(book);
+            }
         }
         catch (Exception ex)
         {
-            Application.Current.Dispatcher.Invoke(() =>
-            {
-                MessageBox.Show(
-                    $"Error loading books: {ex.Message}",
-                    "Error",
-                    MessageBoxButton.OK,
-                    MessageBoxImage.Error
-                );
-            });
+            MessageBox.Show(
+                $"Error loading books: {ex.Message}",
+                "Error",
+                MessageBoxButton.OK,
+                MessageBoxImage.Error
+            );
         }
     }
 
@@ -344,6 +338,6 @@ public class BookManagementViewModel : ViewModelBase
 
     public void RefreshView()
     {
-        Task.Run(async () => await LoadBooksAsync());
+        LoadBooksAsync();
     }
 }
