@@ -11,13 +11,14 @@ namespace WpfApp;
 /// </summary>
 public partial class App : Application
 {
-    public static IHost AppHost { get; private set; }
-    public static IConfiguration Configuration =>
-        AppHost.Services.GetRequiredService<IConfiguration>();
+    private IHost? _host;
 
-    public App()
+    //public static IConfiguration Configuration =>
+    //    AppHost.Services.GetRequiredService<IConfiguration>();
+
+    protected override async void OnStartup(StartupEventArgs e)
     {
-        AppHost = Host.CreateDefaultBuilder()
+        _host = Host.CreateDefaultBuilder()
             .ConfigureAppConfiguration(
                 (context, config) =>
                 {
@@ -29,33 +30,23 @@ public partial class App : Application
             )
             .ConfigureServices(ConfigureServices.AddServices)
             .Build();
-    }
 
-    protected override async void OnStartup(StartupEventArgs e)
-    {
-        await AppHost.StartAsync();
+        await _host.StartAsync();
 
-        var mainWindow = AppHost.Services.GetRequiredService<MainWindow>();
+        var mainWindow = _host.Services.GetRequiredService<MainWindow>();
         mainWindow.Show();
 
         base.OnStartup(e);
-
-        //await AppHost.StartAsync();
-
-        ////using var scope = AppHost.Services.CreateScope();
-        ////var mainWindow = AppHost.Services.GetRequiredService<MainWindow>();
-        ////var mainWindow = scope.ServiceProvider.GetRequiredService<MainWindow>();
-
-        //var mainWindow = AppHost.Services.GetRequiredService<MainWindow>();
-        //mainWindow.Show();
-
-        //base.OnStartup(e);
     }
 
     protected override async void OnExit(ExitEventArgs e)
     {
-        await AppHost.StopAsync();
-        AppHost.Dispose();
+        if (_host != null)
+        {
+            await _host.StopAsync();
+            _host.Dispose();
+        }
+
         base.OnExit(e);
     }
 }

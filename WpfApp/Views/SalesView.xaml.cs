@@ -9,6 +9,13 @@ public partial class SalesView : UserControl
     {
         InitializeComponent();
         DataContext = viewModel;
-        viewModel.LoadBooksCommand.Execute(null);
+    }
+
+    public void RefreshView()
+    {
+        if (DataContext is SalesViewModel viewModel)
+        {
+            viewModel.RefreshView();
+        }
     }
 }

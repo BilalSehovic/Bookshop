@@ -9,6 +9,13 @@ public partial class BookManagementView : UserControl
     {
         InitializeComponent();
         DataContext = viewModel;
-        viewModel.LoadBooksCommand.Execute(null);
+    }
+
+    public void RefreshView()
+    {
+        if (DataContext is BookManagementViewModel viewModel)
+        {
+            viewModel.RefreshView();
+        }
     }
 }

@@ -1,10 +1,9 @@
 ﻿using DataAccessLayer;
-using DataAccessLayer.Data;
-using DataAccessLayer.Interfaces;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
+using WpfApp.Services;
 using WpfApp.ViewModels;
 using WpfApp.Views;
 
@@ -14,30 +13,25 @@ public static class ConfigureServices
 {
     public static void AddServices(HostBuilderContext context, IServiceCollection services)
     {
-        IConfiguration config = context.Configuration;
-
         // Connection string from appsettings or user secrets
-        var connectionString = config.GetConnectionString("DefaultConnection");
+        var connectionString = context.Configuration.GetConnectionString("DefaultConnection");
 
         // DbContext
         services.AddDbContext<AppDbContext>(options => options.UseNpgsql(connectionString));
 
-        // Repositories
-        services.AddScoped<IBookRepository, BookRepository>();
-        services.AddScoped<ISaleRepository, SaleRepository>();
+        // Services
+        services.AddScoped<IBookService, BookService>();
 
         // ViewModels
-        services.AddScoped<MainViewModel>();
-        services.AddScoped<BookManagementViewModel>();
-        services.AddScoped<SalesViewModel>();
-        services.AddScoped<SalesReportingViewModel>();
+        services.AddTransient<MainWindowViewModel>();
+        services.AddTransient<BookManagementViewModel>();
+        services.AddTransient<SalesReportViewModel>();
+        services.AddTransient<SalesViewModel>();
 
         // Views
         services.AddTransient<BookManagementView>();
+        services.AddTransient<SalesReportView>();
         services.AddTransient<SalesView>();
-        services.AddTransient<SalesReportingView>();
-
-        // Main Window
-        services.AddSingleton<MainWindow>();
+        services.AddTransient<MainWindow>();
     }
 }

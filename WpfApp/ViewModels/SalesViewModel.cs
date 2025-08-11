@@ -1,168 +1,280 @@
 using System.Collections.ObjectModel;
+using System.Windows;
 using System.Windows.Input;
-using DataAccessLayer.Interfaces;
 using DataAccessLayer.Models;
-using WpfApp.Commands;
+using WpfApp.Services;
 
 namespace WpfApp.ViewModels;
 
 public class SalesViewModel : ViewModelBase
 {
-    private readonly IBookRepository _bookRepository;
-    private readonly ISaleRepository _saleRepository;
-    private ObservableCollection<Book> _availableBooks = new();
-    private ObservableCollection<SaleItem> _saleItems = new();
+    private readonly IBookService _bookService;
+    private ObservableCollection<Book> _books = new();
     private Book? _selectedBook;
-    private int _quantity = 1;
-    private string _customerName = string.Empty;
-    private decimal _totalAmount;
+    private string _selectedBookText = "No book selected";
+    private string _salePriceText = "";
+    private string _quantityText = "1";
+    private bool _isSellButtonEnabled = false;
+    private string _statusText = "Select a book to sell.";
 
-    public SalesViewModel(IBookRepository bookRepository, ISaleRepository saleRepository)
+    public SalesViewModel(IBookService bookService)
     {
-        _bookRepository = bookRepository;
-        _saleRepository = saleRepository;
-
-        LoadBooksCommand = new RelayCommand(async () => await LoadBooks());
-        AddToSaleCommand = new RelayCommand(AddToSale, () => SelectedBook != null && Quantity > 0);
-        RemoveFromSaleCommand = new RelayCommand<SaleItem>(RemoveFromSale);
-        CompleteSaleCommand = new RelayCommand(
-            async () => await CompleteSale(),
-            () => SaleItems.Any()
+        _bookService = bookService;
+        SellBookCommand = new RelayCommand(
+            async () => await SellBookAsync(),
+            () => IsSellButtonEnabled
         );
-        ClearSaleCommand = new RelayCommand(ClearSale);
+        LoadBooksCommand = new RelayCommand(async () => await LoadAvailableBooksAsync());
+
+        Task.Run(async () => await LoadAvailableBooksAsync());
     }
 
-    public ObservableCollection<Book> AvailableBooks
+    public ObservableCollection<Book> Books
     {
-        get => _availableBooks;
-        set => SetProperty(ref _availableBooks, value);
-    }
-
-    public ObservableCollection<SaleItem> SaleItems
-    {
-        get => _saleItems;
-        set
-        {
-            SetProperty(ref _saleItems, value);
-            CalculateTotal();
-        }
+        get => _books;
+        set => SetProperty(ref _books, value);
     }
 
     public Book? SelectedBook
     {
         get => _selectedBook;
-        set => SetProperty(ref _selectedBook, value);
-    }
-
-    public int Quantity
-    {
-        get => _quantity;
-        set => SetProperty(ref _quantity, value);
-    }
-
-    public string CustomerName
-    {
-        get => _customerName;
-        set => SetProperty(ref _customerName, value);
-    }
-
-    public decimal TotalAmount
-    {
-        get => _totalAmount;
-        set => SetProperty(ref _totalAmount, value);
-    }
-
-    public ICommand LoadBooksCommand { get; }
-    public ICommand AddToSaleCommand { get; }
-    public ICommand RemoveFromSaleCommand { get; }
-    public ICommand CompleteSaleCommand { get; }
-    public ICommand ClearSaleCommand { get; }
-
-    private async Task LoadBooks()
-    {
-        var books = await _bookRepository.GetAllAsync();
-        AvailableBooks = new ObservableCollection<Book>(books.Where(b => b.StockQuantity > 0));
-    }
-
-    private void AddToSale()
-    {
-        if (SelectedBook == null || Quantity <= 0 || Quantity > SelectedBook.StockQuantity)
-            return;
-
-        var existingItem = SaleItems.FirstOrDefault(si => si.Book.Id == SelectedBook.Id);
-        if (existingItem != null)
+        set
         {
-            existingItem.Quantity += Quantity;
-            existingItem.TotalPrice = existingItem.Quantity * (decimal)existingItem.Book.Price;
+            if (SetProperty(ref _selectedBook, value))
+            {
+                UpdateSelectedBookInfo();
+            }
+        }
+    }
+
+    public string SelectedBookText
+    {
+        get => _selectedBookText;
+        set => SetProperty(ref _selectedBookText, value);
+    }
+
+    public string SalePriceText
+    {
+        get => _salePriceText;
+        set => SetProperty(ref _salePriceText, value);
+    }
+
+    public string QuantityText
+    {
+        get => _quantityText;
+        set => SetProperty(ref _quantityText, value);
+    }
+
+    public bool IsSellButtonEnabled
+    {
+        get => _isSellButtonEnabled;
+        set
+        {
+            if (SetProperty(ref _isSellButtonEnabled, value))
+            {
+                ((RelayCommand)SellBookCommand).RaiseCanExecuteChanged();
+            }
+        }
+    }
+
+    public string StatusText
+    {
+        get => _statusText;
+        set => SetProperty(ref _statusText, value);
+    }
+
+    public ICommand SellBookCommand { get; }
+    public ICommand LoadBooksCommand { get; }
+
+    private async Task LoadAvailableBooksAsync()
+    {
+        try
+        {
+            var books = await _bookService.GetAllBooksAsync();
+
+            Application.Current.Dispatcher.Invoke(() =>
+            {
+                Books.Clear();
+                foreach (var book in books.OrderBy(b => b.Title))
+                {
+                    Books.Add(book);
+                }
+
+                var inStockCount = books.Count(b => b.StockQuantity > 0);
+                var outOfStockCount = books.Count(b => b.StockQuantity == 0);
+
+                StatusText =
+                    $"{books.Count} books total ({inStockCount} in stock, {outOfStockCount} out of stock).";
+
+                if (books.Count == 0)
+                    StatusText = "No books in inventory.";
+            });
+        }
+        catch (Exception ex)
+        {
+            Application.Current.Dispatcher.Invoke(() =>
+            {
+                MessageBox.Show(
+                    $"Error loading books: {ex.Message}",
+                    "Error",
+                    MessageBoxButton.OK,
+                    MessageBoxImage.Error
+                );
+                StatusText = "Error loading books.";
+            });
+        }
+    }
+
+    private void UpdateSelectedBookInfo()
+    {
+        if (SelectedBook != null)
+        {
+            SelectedBookText = $"{SelectedBook.Title} by {SelectedBook.Author}";
+            SalePriceText = SelectedBook.Price.ToString("F2");
+            QuantityText = "1";
+
+            if (SelectedBook.StockQuantity > 0)
+            {
+                IsSellButtonEnabled = true;
+                StatusText =
+                    $"Ready to sell: {SelectedBook.Title} (Stock: {SelectedBook.StockQuantity})";
+            }
+            else
+            {
+                IsSellButtonEnabled = false;
+                StatusText = $"Selected: {SelectedBook.Title} (OUT OF STOCK)";
+            }
         }
         else
         {
-            var saleItem = new SaleItem
-            {
-                Book = SelectedBook,
-                Quantity = Quantity,
-                UnitPrice = (decimal)SelectedBook.Price,
-                TotalPrice = Quantity * (decimal)SelectedBook.Price,
-            };
-            SaleItems.Add(saleItem);
+            ClearSelection();
         }
-
-        CalculateTotal();
-        Quantity = 1;
     }
 
-    private void RemoveFromSale(SaleItem? saleItem)
+    private async Task SellBookAsync()
     {
-        if (saleItem != null)
+        if (SelectedBook == null)
         {
-            SaleItems.Remove(saleItem);
-            CalculateTotal();
+            MessageBox.Show(
+                "Please select a book to sell.",
+                "No Selection",
+                MessageBoxButton.OK,
+                MessageBoxImage.Warning
+            );
+            return;
         }
-    }
 
-    private async Task CompleteSale()
-    {
-        foreach (var saleItem in SaleItems)
+        if (!double.TryParse(SalePriceText, out double salePrice) || salePrice <= 0)
         {
-            var sale = new Sale
-            {
-                BookId = saleItem.Book.Id,
-                Book = saleItem.Book,
-                Quantity = saleItem.Quantity,
-                UnitPrice = (double)saleItem.UnitPrice,
-                TotalPrice = (double)saleItem.TotalPrice,
-                SaleDate = DateTime.Now,
-                CustomerName = string.IsNullOrWhiteSpace(CustomerName) ? null : CustomerName,
-            };
-
-            await _saleRepository.AddAsync(sale);
-
-            // Update stock
-            saleItem.Book.StockQuantity -= saleItem.Quantity;
-            await _bookRepository.UpdateAsync(saleItem.Book);
+            MessageBox.Show(
+                "Please enter a valid sale price.",
+                "Invalid Price",
+                MessageBoxButton.OK,
+                MessageBoxImage.Warning
+            );
+            return;
         }
 
-        ClearSale();
-        await LoadBooks(); // Refresh available books
+        if (!int.TryParse(QuantityText, out int quantity) || quantity <= 0)
+        {
+            MessageBox.Show(
+                "Please enter a valid quantity (must be 1 or greater).",
+                "Invalid Quantity",
+                MessageBoxButton.OK,
+                MessageBoxImage.Warning
+            );
+            return;
+        }
+
+        if (quantity > SelectedBook.StockQuantity)
+        {
+            MessageBox.Show(
+                $"Cannot sell {quantity} books. Only {SelectedBook.StockQuantity} in stock.",
+                "Insufficient Stock",
+                MessageBoxButton.OK,
+                MessageBoxImage.Warning
+            );
+            return;
+        }
+
+        var totalPrice = salePrice * quantity;
+        var result = MessageBox.Show(
+            $"Confirm sale of:\n\nBook: {SelectedBook.Title}\nAuthor: {SelectedBook.Author}\nQuantity: {quantity}\nPrice per book: {salePrice:C}\nTotal Price: {totalPrice:C}\n\nThis will reduce stock by {quantity}.",
+            "Confirm Sale",
+            MessageBoxButton.YesNo,
+            MessageBoxImage.Question
+        );
+
+        if (result == MessageBoxResult.Yes)
+        {
+            try
+            {
+                IsSellButtonEnabled = false;
+                StatusText = "Processing sale...";
+
+                bool success = await _bookService.SellBookAsync(
+                    SelectedBook.Id,
+                    salePrice,
+                    quantity
+                );
+
+                if (success)
+                {
+                    var remainingStock = SelectedBook.StockQuantity - quantity;
+                    MessageBox.Show(
+                        $"Book sold successfully!\n\nTitle: {SelectedBook.Title}\nQuantity Sold: {quantity}\nPrice per book: {salePrice:C}\nTotal Sale: {totalPrice:C}\nRemaining Stock: {remainingStock}",
+                        "Sale Complete",
+                        MessageBoxButton.OK,
+                        MessageBoxImage.Information
+                    );
+
+                    ClearSelection();
+                    await LoadAvailableBooksAsync();
+                }
+                else
+                {
+                    MessageBox.Show(
+                        "Sale failed. The book may be out of stock or no longer available.",
+                        "Sale Failed",
+                        MessageBoxButton.OK,
+                        MessageBoxImage.Error
+                    );
+                    await LoadAvailableBooksAsync();
+                }
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show(
+                    $"Error processing sale: {ex.Message}",
+                    "Error",
+                    MessageBoxButton.OK,
+                    MessageBoxImage.Error
+                );
+                IsSellButtonEnabled = true;
+                StatusText = "Sale failed.";
+            }
+        }
+        else
+        {
+            IsSellButtonEnabled = true;
+            StatusText =
+                $"Ready to sell: {SelectedBook.Title} (Stock: {SelectedBook.StockQuantity})";
+        }
     }
 
-    private void ClearSale()
+    private void ClearSelection()
     {
-        SaleItems.Clear();
-        CustomerName = string.Empty;
-        TotalAmount = 0;
+        SelectedBook = null;
+        SelectedBookText = "No book selected";
+        SalePriceText = "";
+        QuantityText = "1";
+        IsSellButtonEnabled = false;
+        StatusText = "Select a book to sell.";
     }
 
-    private void CalculateTotal()
+    public void RefreshView()
     {
-        TotalAmount = SaleItems.Sum(si => si.TotalPrice);
+        ClearSelection();
+        Task.Run(async () => await LoadAvailableBooksAsync());
     }
-}
-
-public class SaleItem
-{
-    public Book Book { get; set; } = null!;
-    public int Quantity { get; set; }
-    public decimal UnitPrice { get; set; }
-    public decimal TotalPrice { get; set; }
 }
