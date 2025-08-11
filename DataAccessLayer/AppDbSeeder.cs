@@ -27,7 +27,7 @@ public static class AppDbSeeded
                     Author = "George Orwell",
                     Isbn = "978-0451524935",
                     Price = 7.99,
-                    StockQuantity = 2,
+                    StockQuantity = 28,
                 },
                 new Book
                 {
@@ -36,7 +36,7 @@ public static class AppDbSeeded
                     Author = "Harper Lee",
                     Isbn = "978-0061120084",
                     Price = 8.49,
-                    StockQuantity = 15,
+                    StockQuantity = 24,
                 },
                 new Book
                 {
@@ -45,7 +45,7 @@ public static class AppDbSeeded
                     Author = "Jane Austen",
                     Isbn = "978-1503290563",
                     Price = 6.99,
-                    StockQuantity = 14,
+                    StockQuantity = 31,
                 },
                 new Book
                 {
@@ -72,7 +72,7 @@ public static class AppDbSeeded
                     Author = "Leo Tolstoy",
                     Isbn = "978-1400079988",
                     Price = 12.99,
-                    StockQuantity = 20,
+                    StockQuantity = 19,
                 },
                 new Book
                 {
@@ -90,7 +90,7 @@ public static class AppDbSeeded
                     Author = "J.D. Salinger",
                     Isbn = "978-0316769488",
                     Price = 8.99,
-                    StockQuantity = 5,
+                    StockQuantity = 16,
                 },
                 new Book
                 {
@@ -99,97 +99,7 @@ public static class AppDbSeeded
                     Author = "Aldous Huxley",
                     Isbn = "978-0060850524",
                     Price = 7.89,
-                    StockQuantity = 100,
-                },
-                new Book
-                {
-                    Id = Guid.Parse("f6332d83-5ed3-41f2-bc4b-5f93c97a3e07"),
-                    Title = "The Lord of the Rings",
-                    Author = "J.R.R. Tolkien",
-                    Isbn = "978-0618640157",
-                    Price = 14.99,
-                    StockQuantity = 70,
-                },
-                new Book
-                {
-                    Id = Guid.Parse("8c276e4b-b1a0-4e72-b15f-f8b9b2e6fd72"),
-                    Title = "Harry Potter and the Sorcerer's Stone",
-                    Author = "J.K. Rowling",
-                    Isbn = "978-0590353427",
-                    Price = 9.49,
-                    StockQuantity = 50,
-                },
-                new Book
-                {
-                    Id = Guid.Parse("20a6ec6e-d4d8-4ff1-8e19-3ff0c67dc8ec"),
-                    Title = "The Chronicles of Narnia",
-                    Author = "C.S. Lewis",
-                    Isbn = "978-0066238500",
-                    Price = 8.79,
-                    StockQuantity = 30,
-                },
-                new Book
-                {
-                    Id = Guid.Parse("c771cf23-9a6d-4e77-8f8f-1f58692eb3a7"),
-                    Title = "Anna Karenina",
-                    Author = "Leo Tolstoy",
-                    Isbn = "978-0143035008",
-                    Price = 11.99,
-                    StockQuantity = 30,
-                },
-                new Book
-                {
-                    Id = Guid.Parse("b0c85cb0-6041-40d4-a0d0-3df4d9e0c733"),
-                    Title = "The Alchemist",
-                    Author = "Paulo Coelho",
-                    Isbn = "978-0061122415",
-                    Price = 8.29,
-                    StockQuantity = 14,
-                },
-                new Book
-                {
-                    Id = Guid.Parse("3f84bb7a-2eb5-4a21-bb16-74af4f16fbbf"),
-                    Title = "Les Misérables",
-                    Author = "Victor Hugo",
-                    Isbn = "978-0451419439",
-                    Price = 12.49,
-                    StockQuantity = 10,
-                },
-                new Book
-                {
-                    Id = Guid.Parse("e78a8c29-9382-4d53-b5cb-8265f8b2a27f"),
-                    Title = "Dracula",
-                    Author = "Bram Stoker",
-                    Isbn = "978-0486411095",
-                    Price = 7.19,
-                    StockQuantity = 70,
-                },
-                new Book
-                {
-                    Id = Guid.Parse("9df23a68-8b7e-43b3-a7f2-fb32cb0f89f3"),
-                    Title = "Frankenstein",
-                    Author = "Mary Shelley",
-                    Isbn = "978-0486282114",
-                    Price = 6.89,
-                    StockQuantity = 50,
-                },
-                new Book
-                {
-                    Id = Guid.Parse("b0af9fd1-3a8e-4ef4-90aa-2f86b1c34f66"),
-                    Title = "The Kite Runner",
-                    Author = "Khaled Hosseini",
-                    Isbn = "978-1594631931",
-                    Price = 9.19,
-                    StockQuantity = 30,
-                },
-                new Book
-                {
-                    Id = Guid.Parse("d6b2df6f-52d4-4098-9957-6cb8ce00c9a5"),
-                    Title = "A Tale of Two Cities",
-                    Author = "Charles Dickens",
-                    Isbn = "978-1503219700",
-                    Price = 8.59,
-                    StockQuantity = 20,
+                    StockQuantity = 46,
                 }
             );
     }
