@@ -1,6 +1,6 @@
 ﻿using DataAccessLayer.Models;
 
-namespace DataAccessLayer.Data
+namespace DataAccessLayer.Interfaces
 {
     public interface IBookRepository
     {
@@ -8,7 +8,7 @@ namespace DataAccessLayer.Data
         Task DeleteAsync(Book Book);
         List<Book> GetAll();
         Task<List<Book>> GetAllAsync();
-        Task<Book> GetByIdAsync(int id);
+        Task<Book?> GetByIdAsync(Guid id);
         Task UpdateAsync(Book Book);
     }
 }

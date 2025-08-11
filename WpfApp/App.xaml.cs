@@ -40,9 +40,16 @@ public partial class App : Application
 
         base.OnStartup(e);
 
-        //using var scope = AppHost.Services.CreateScope();
-        //var mainWindow = scope.ServiceProvider.GetRequiredService<MainWindow>();
+        //await AppHost.StartAsync();
+
+        ////using var scope = AppHost.Services.CreateScope();
+        ////var mainWindow = AppHost.Services.GetRequiredService<MainWindow>();
+        ////var mainWindow = scope.ServiceProvider.GetRequiredService<MainWindow>();
+
+        //var mainWindow = AppHost.Services.GetRequiredService<MainWindow>();
         //mainWindow.Show();
+
+        //base.OnStartup(e);
     }
 
     protected override async void OnExit(ExitEventArgs e)

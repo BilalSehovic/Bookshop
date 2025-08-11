@@ -1,20 +1,23 @@
 ﻿using System.Windows;
-using Microsoft.Extensions.DependencyInjection;
+using WpfApp.Services;
 
-namespace WpfApp
+namespace WpfApp;
+
+/// <summary>
+/// Interaction logic for MainWindow.xaml
+/// </summary>
+public partial class MainWindow : Window
 {
-    /// <summary>
-    /// Interaction logic for MainWindow.xaml
-    /// </summary>
-    public partial class MainWindow : Window
+    //public MainWindow(MainViewModel viewModel)
+    //{
+    //    InitializeComponent();
+    //    DataContext = viewModel;
+    //}
+    public MainWindow(INavigationService navigation)
     {
-        private readonly IServiceScopeFactory _scopeFactory;
+        InitializeComponent();
 
-        public MainWindow(IServiceScopeFactory scopeFactory)
-        {
-            _scopeFactory = scopeFactory;
-
-            InitializeComponent();
-        }
+        // Start with Home view
+        navigation.Navigate<HomeView>();
     }
 }

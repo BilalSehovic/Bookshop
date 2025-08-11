@@ -5,8 +5,52 @@
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:WpfApp"
         mc:Ignorable="d"
-        Title="MainWindow" Height="450" Width="800">
+        Title="Bookshop Management System" Height="800" Width="1200" WindowStartupLocation="CenterScreen">
     <Grid>
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="*"/>
+        </Grid.RowDefinitions>
         
+        <!-- Header -->
+        <Border Grid.Row="0" Background="DarkBlue" Padding="20,15">
+            <StackPanel>
+                <TextBlock Text="Bookshop Management System" 
+                           FontSize="28" FontWeight="Bold" 
+                           Foreground="White" HorizontalAlignment="Center"/>
+                <TextBlock Text="{Binding CurrentViewName, StringFormat='Current View: {0}'}" 
+                           FontSize="14" Foreground="LightBlue" 
+                           HorizontalAlignment="Center" Margin="0,5,0,0"/>
+            </StackPanel>
+        </Border>
+        
+        <!-- Navigation -->
+        <Border Grid.Row="1" Background="LightGray" Padding="15,10">
+            <StackPanel Orientation="Horizontal" HorizontalAlignment="Center">
+                <Button Content="📚 Book Management" 
+                        Command="{Binding ShowBookManagementCommand}"
+                        Padding="20,10" Margin="0,0,10,0"
+                        Background="SteelBlue" Foreground="White" 
+                        FontSize="14" FontWeight="Bold"/>
+                
+                <Button Content="💰 Sales" 
+                        Command="{Binding ShowSalesCommand}"
+                        Padding="20,10" Margin="0,0,10,0"
+                        Background="Green" Foreground="White" 
+                        FontSize="14" FontWeight="Bold"/>
+                
+                <Button Content="📊 Sales Reports" 
+                        Command="{Binding ShowSalesReportingCommand}"
+                        Padding="20,10"
+                        Background="Orange" Foreground="White" 
+                        FontSize="14" FontWeight="Bold"/>
+            </StackPanel>
+        </Border>
+        
+        <!-- Main Content Area -->
+        <Border Grid.Row="2" Background="White" Padding="5">
+            <ContentPresenter Content="{Binding CurrentView}"/>
+        </Border>
     </Grid>
 </Window>

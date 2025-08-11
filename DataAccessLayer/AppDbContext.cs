@@ -10,6 +10,7 @@ namespace DataAccessLayer
 
         public DbSet<Person> Persons { get; set; }
         public DbSet<Book> Books { get; set; }
+        public DbSet<Sale> Sales { get; set; }
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
@@ -19,6 +20,12 @@ namespace DataAccessLayer
                 .HasDefaultValueSql("gen_random_uuid()");
 
             modelBuilder.Entity<Book>().Property(x => x.Id).HasDefaultValueSql("gen_random_uuid()");
+
+            modelBuilder.Entity<Sale>().Property(x => x.Id).HasDefaultValueSql("gen_random_uuid()");
+
+            modelBuilder.Entity<Sale>().HasOne(s => s.Book).WithMany().HasForeignKey(s => s.BookId);
+
+            modelBuilder.SeedBooks();
         }
     }
 }

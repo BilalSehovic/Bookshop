@@ -1,4 +1,5 @@
-﻿using DataAccessLayer.Models;
+﻿using DataAccessLayer.Interfaces;
+using DataAccessLayer.Models;
 using Microsoft.EntityFrameworkCore;
 
 namespace DataAccessLayer.Data
@@ -16,7 +17,7 @@ namespace DataAccessLayer.Data
 
         public async Task<List<Book>> GetAllAsync() => await _context.Books.ToListAsync();
 
-        public async Task<Book> GetByIdAsync(int id) => await _context.Books.FindAsync(id);
+        public async Task<Book?> GetByIdAsync(Guid id) => await _context.Books.FindAsync(id);
 
         public async Task AddAsync(Book Book)
         {

@@ -3,6 +3,7 @@ using System;
 using DataAccessLayer;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 
@@ -11,9 +12,11 @@ using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 namespace DataAccessLayer.Migrations
 {
     [DbContext(typeof(AppDbContext))]
-    partial class AppDbContextModelSnapshot : ModelSnapshot
+    [Migration("20250808090623_SeedBooks")]
+    partial class SeedBooks
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -58,7 +61,7 @@ namespace DataAccessLayer.Migrations
                             Author = "J.R.R. Tolkien",
                             Isbn = "978-0547928227",
                             Price = 9.9900000000000002,
-                            StockQuantity = 1,
+                            StockQuantity = 0,
                             Title = "The Hobbit"
                         },
                         new
@@ -67,7 +70,7 @@ namespace DataAccessLayer.Migrations
                             Author = "George Orwell",
                             Isbn = "978-0451524935",
                             Price = 7.9900000000000002,
-                            StockQuantity = 2,
+                            StockQuantity = 0,
                             Title = "1984"
                         },
                         new
@@ -76,7 +79,7 @@ namespace DataAccessLayer.Migrations
                             Author = "Harper Lee",
                             Isbn = "978-0061120084",
                             Price = 8.4900000000000002,
-                            StockQuantity = 15,
+                            StockQuantity = 0,
                             Title = "To Kill a Mockingbird"
                         },
                         new
@@ -85,7 +88,7 @@ namespace DataAccessLayer.Migrations
                             Author = "Jane Austen",
                             Isbn = "978-1503290563",
                             Price = 6.9900000000000002,
-                            StockQuantity = 14,
+                            StockQuantity = 0,
                             Title = "Pride and Prejudice"
                         },
                         new
@@ -94,7 +97,7 @@ namespace DataAccessLayer.Migrations
                             Author = "F. Scott Fitzgerald",
                             Isbn = "978-0743273565",
                             Price = 7.4900000000000002,
-                            StockQuantity = 13,
+                            StockQuantity = 0,
                             Title = "The Great Gatsby"
                         },
                         new
@@ -103,7 +106,7 @@ namespace DataAccessLayer.Migrations
                             Author = "Herman Melville",
                             Isbn = "978-1503280786",
                             Price = 10.99,
-                            StockQuantity = 12,
+                            StockQuantity = 0,
                             Title = "Moby-Dick"
                         },
                         new
@@ -112,7 +115,7 @@ namespace DataAccessLayer.Migrations
                             Author = "Leo Tolstoy",
                             Isbn = "978-1400079988",
                             Price = 12.99,
-                            StockQuantity = 20,
+                            StockQuantity = 0,
                             Title = "War and Peace"
                         },
                         new
@@ -121,7 +124,7 @@ namespace DataAccessLayer.Migrations
                             Author = "Fyodor Dostoevsky",
                             Isbn = "978-0486415871",
                             Price = 11.49,
-                            StockQuantity = 50,
+                            StockQuantity = 0,
                             Title = "Crime and Punishment"
                         },
                         new
@@ -130,7 +133,7 @@ namespace DataAccessLayer.Migrations
                             Author = "J.D. Salinger",
                             Isbn = "978-0316769488",
                             Price = 8.9900000000000002,
-                            StockQuantity = 5,
+                            StockQuantity = 0,
                             Title = "The Catcher in the Rye"
                         },
                         new
@@ -139,7 +142,7 @@ namespace DataAccessLayer.Migrations
                             Author = "Aldous Huxley",
                             Isbn = "978-0060850524",
                             Price = 7.8899999999999997,
-                            StockQuantity = 100,
+                            StockQuantity = 0,
                             Title = "Brave New World"
                         },
                         new
@@ -148,7 +151,7 @@ namespace DataAccessLayer.Migrations
                             Author = "J.R.R. Tolkien",
                             Isbn = "978-0618640157",
                             Price = 14.99,
-                            StockQuantity = 70,
+                            StockQuantity = 0,
                             Title = "The Lord of the Rings"
                         },
                         new
@@ -157,7 +160,7 @@ namespace DataAccessLayer.Migrations
                             Author = "J.K. Rowling",
                             Isbn = "978-0590353427",
                             Price = 9.4900000000000002,
-                            StockQuantity = 50,
+                            StockQuantity = 0,
                             Title = "Harry Potter and the Sorcerer's Stone"
                         },
                         new
@@ -166,7 +169,7 @@ namespace DataAccessLayer.Migrations
                             Author = "C.S. Lewis",
                             Isbn = "978-0066238500",
                             Price = 8.7899999999999991,
-                            StockQuantity = 30,
+                            StockQuantity = 0,
                             Title = "The Chronicles of Narnia"
                         },
                         new
@@ -175,7 +178,7 @@ namespace DataAccessLayer.Migrations
                             Author = "Leo Tolstoy",
                             Isbn = "978-0143035008",
                             Price = 11.99,
-                            StockQuantity = 30,
+                            StockQuantity = 0,
                             Title = "Anna Karenina"
                         },
                         new
@@ -184,7 +187,7 @@ namespace DataAccessLayer.Migrations
                             Author = "Paulo Coelho",
                             Isbn = "978-0061122415",
                             Price = 8.2899999999999991,
-                            StockQuantity = 14,
+                            StockQuantity = 0,
                             Title = "The Alchemist"
                         },
                         new
@@ -193,7 +196,7 @@ namespace DataAccessLayer.Migrations
                             Author = "Victor Hugo",
                             Isbn = "978-0451419439",
                             Price = 12.49,
-                            StockQuantity = 10,
+                            StockQuantity = 0,
                             Title = "Les Misérables"
                         },
                         new
@@ -202,7 +205,7 @@ namespace DataAccessLayer.Migrations
                             Author = "Bram Stoker",
                             Isbn = "978-0486411095",
                             Price = 7.1900000000000004,
-                            StockQuantity = 70,
+                            StockQuantity = 0,
                             Title = "Dracula"
                         },
                         new
@@ -211,7 +214,7 @@ namespace DataAccessLayer.Migrations
                             Author = "Mary Shelley",
                             Isbn = "978-0486282114",
                             Price = 6.8899999999999997,
-                            StockQuantity = 50,
+                            StockQuantity = 0,
                             Title = "Frankenstein"
                         },
                         new
@@ -220,7 +223,7 @@ namespace DataAccessLayer.Migrations
                             Author = "Khaled Hosseini",
                             Isbn = "978-1594631931",
                             Price = 9.1899999999999995,
-                            StockQuantity = 30,
+                            StockQuantity = 0,
                             Title = "The Kite Runner"
                         },
                         new
@@ -229,7 +232,7 @@ namespace DataAccessLayer.Migrations
                             Author = "Charles Dickens",
                             Isbn = "978-1503219700",
                             Price = 8.5899999999999999,
-                            StockQuantity = 20,
+                            StockQuantity = 0,
                             Title = "A Tale of Two Cities"
                         });
                 });

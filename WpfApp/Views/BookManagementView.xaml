@@ -1,0 +1,81 @@
+<UserControl x:Class="WpfApp.Views.BookManagementView"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
+    <Grid Margin="10">
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="*"/>
+            <RowDefinition Height="Auto"/>
+        </Grid.RowDefinitions>
+        
+        <!-- Header -->
+        <TextBlock Grid.Row="0" Text="Book Management" FontSize="24" FontWeight="Bold" Margin="0,0,0,20"/>
+        
+        <!-- Books DataGrid -->
+        <DataGrid Grid.Row="1" 
+                  ItemsSource="{Binding Books}"
+                  SelectedItem="{Binding SelectedBook}"
+                  AutoGenerateColumns="False"
+                  CanUserAddRows="False"
+                  Margin="0,0,0,20">
+            <DataGrid.Columns>
+                <DataGridTextColumn Header="Title" Binding="{Binding Title}" Width="*"/>
+                <DataGridTextColumn Header="Author" Binding="{Binding Author}" Width="*"/>
+                <DataGridTextColumn Header="ISBN" Binding="{Binding Isbn}" Width="150"/>
+                <DataGridTextColumn Header="Price" Binding="{Binding Price, StringFormat=C}" Width="100"/>
+                <DataGridTextColumn Header="Stock" Binding="{Binding StockQuantity}" Width="80"/>
+            </DataGrid.Columns>
+        </DataGrid>
+        
+        <!-- Control Panel -->
+        <Grid Grid.Row="2">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="*"/>
+                <ColumnDefinition Width="Auto"/>
+            </Grid.ColumnDefinitions>
+            
+            <!-- Edit Form (shown when editing) -->
+            <StackPanel Grid.Column="0" Visibility="{Binding IsEditing, Converter={StaticResource BooleanToVisibilityConverter}}">
+                <Grid>
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="Auto"/>
+                        <ColumnDefinition Width="*"/>
+                        <ColumnDefinition Width="Auto"/>
+                        <ColumnDefinition Width="*"/>
+                        <ColumnDefinition Width="Auto"/>
+                        <ColumnDefinition Width="*"/>
+                    </Grid.ColumnDefinitions>
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="Auto"/>
+                        <RowDefinition Height="Auto"/>
+                    </Grid.RowDefinitions>
+                    
+                    <Label Grid.Row="0" Grid.Column="0" Content="Title:" VerticalAlignment="Center" Margin="0,0,5,0"/>
+                    <TextBox Grid.Row="0" Grid.Column="1" Text="{Binding EditingBook.Title}" Margin="0,0,10,5"/>
+                    
+                    <Label Grid.Row="0" Grid.Column="2" Content="Author:" VerticalAlignment="Center" Margin="0,0,5,0"/>
+                    <TextBox Grid.Row="0" Grid.Column="3" Text="{Binding EditingBook.Author}" Margin="0,0,10,5"/>
+                    
+                    <Label Grid.Row="0" Grid.Column="4" Content="ISBN:" VerticalAlignment="Center" Margin="0,0,5,0"/>
+                    <TextBox Grid.Row="0" Grid.Column="5" Text="{Binding EditingBook.Isbn}" Margin="0,0,0,5"/>
+                    
+                    <Label Grid.Row="1" Grid.Column="0" Content="Price:" VerticalAlignment="Center" Margin="0,0,5,0"/>
+                    <TextBox Grid.Row="1" Grid.Column="1" Text="{Binding EditingBook.Price}" Margin="0,0,10,0"/>
+                    
+                    <Label Grid.Row="1" Grid.Column="2" Content="Stock:" VerticalAlignment="Center" Margin="0,0,5,0"/>
+                    <TextBox Grid.Row="1" Grid.Column="3" Text="{Binding EditingBook.StockQuantity}" Margin="0,0,10,0"/>
+                </Grid>
+            </StackPanel>
+            
+            <!-- Action Buttons -->
+            <StackPanel Grid.Column="1" Orientation="Horizontal">
+                <Button Content="Load Books" Command="{Binding LoadBooksCommand}" Margin="0,0,5,0" Padding="10,5"/>
+                <Button Content="Add Book" Command="{Binding AddBookCommand}" Margin="0,0,5,0" Padding="10,5"/>
+                <Button Content="Edit Book" Command="{Binding EditBookCommand}" Margin="0,0,5,0" Padding="10,5"/>
+                <Button Content="Delete Book" Command="{Binding DeleteBookCommand}" Margin="0,0,5,0" Padding="10,5"/>
+                <Button Content="Save" Command="{Binding SaveBookCommand}" Margin="0,0,5,0" Padding="10,5" Background="Green" Foreground="White"/>
+                <Button Content="Cancel" Command="{Binding CancelEditCommand}" Padding="10,5"/>
+            </StackPanel>
+        </Grid>
+    </Grid>
+</UserControl>
