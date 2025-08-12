@@ -1,6 +1,4 @@
-using DataAccessLayer.Models;
-
-namespace WpfApp.Tests.TestHelpers
+namespace WpfApp.Tests.Helpers
 {
     /// <summary>
     /// Provides test data for unit tests

@@ -1,7 +1,6 @@
 using DataAccessLayer;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
-using WpfApp.Tests.TestHelpers;
 using WpfApp.ViewModels;
 using WpfApp.Views;
 

@@ -5,4 +5,5 @@ global using System.Threading.Tasks;
 global using DataAccessLayer.Models;
 global using FluentAssertions;
 global using Moq;
+global using WpfApp.Tests.Helpers;
 global using Xunit;

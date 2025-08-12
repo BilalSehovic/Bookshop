@@ -1,6 +1,6 @@
 using System.Windows.Threading;
 
-namespace WpfApp.Tests.TestHelpers
+namespace WpfApp.Tests.Helpers
 {
     /// <summary>
     /// Test helper for WPF Dispatcher operations in unit tests

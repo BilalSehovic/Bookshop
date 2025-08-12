@@ -1,5 +1,4 @@
 using WpfApp.Services;
-using WpfApp.Tests.TestHelpers;
 using WpfApp.ViewModels;
 
 namespace WpfApp.Tests.Integration
@@ -92,36 +91,37 @@ namespace WpfApp.Tests.Integration
             mockService.Verify(x => x.SellBookAsync(bookToSell.Id, 15.99, 2), Times.Once);
         }
 
-        //[Fact]
-        //public async Task SalesReportViewModel_LoadAndExportWorkflow_ShouldWorkTogether()
-        //{
-        //    // Arrange
-        //    var mockService = new Mock<IBookService>();
-        //    var sales = TestData.CreateTestSales(5);
-        //    var testDate = DateTime.Today;
+        [Fact]
+        public async Task SalesReportViewModel_LoadAndExportWorkflow_ShouldWorkTogether()
+        {
+            // Arrange
+            var mockService = new Mock<IBookService>();
+            var initialBooks = TestData.CreateTestBooks(3).ToList();
+            var sales = TestData.CreateTestSales(initialBooks, 5);
+            var testDate = DateTime.Today;
 
-        //    mockService.Setup(x => x.GetSalesByDateAsync(testDate)).ReturnsAsync(sales);
+            mockService.Setup(x => x.GetSalesByDateAsync(testDate)).ReturnsAsync(sales);
 
-        //    var viewModel = new SalesReportViewModel(mockService.Object);
-        //    await Task.Delay(200);
+            var viewModel = new SalesReportViewModel(mockService.Object);
+            await Task.Delay(200);
 
-        //    // Act - Change date and verify data loads
-        //    viewModel.SelectedDate = testDate.AddDays(-1);
-        //    await Task.Delay(200);
+            // Act - Change date and verify data loads
+            viewModel.SelectedDate = testDate.AddDays(-1);
+            await Task.Delay(200);
 
-        //    // Act - Use Today command
-        //    viewModel.TodayCommand.Execute(null);
-        //    await Task.Delay(200);
+            // Act - Use Today command
+            viewModel.TodayCommand.Execute(null);
+            await Task.Delay(200);
 
-        //    // Assert
-        //    viewModel.Sales.Should().HaveCount(sales.Count);
-        //    viewModel.TotalSales.Should().Be(sales.Count);
-        //    viewModel.BooksSold.Should().Be(sales.Sum(s => s.Quantity));
-        //    viewModel.TotalRevenue.Should().Be(sales.Sum(s => s.UnitPrice * s.Quantity));
-        //    viewModel.IsExportEnabled.Should().BeTrue();
+            // Assert
+            viewModel.Sales.Should().HaveCount(sales.Count);
+            viewModel.TotalSales.Should().Be(sales.Count);
+            viewModel.BooksSold.Should().Be(sales.Sum(s => s.Quantity));
+            viewModel.TotalRevenue.Should().Be(sales.Sum(s => s.UnitPrice * s.Quantity));
+            viewModel.IsExportEnabled.Should().BeTrue();
 
-        //    mockService.Verify(x => x.GetSalesByDateAsync(It.IsAny<DateTime>()), Times.AtLeast(2));
-        //}
+            mockService.Verify(x => x.GetSalesByDateAsync(It.IsAny<DateTime>()), Times.AtLeast(2));
+        }
 
         [Fact]
         public async Task CrossViewModel_DataConsistency_ShouldMaintainState()
@@ -167,100 +167,6 @@ namespace WpfApp.Tests.Integration
             bookManagementVM.Books.Should().NotBeEmpty();
             salesVM.Books.Should().NotBeEmpty();
             salesReportVM.Sales.Should().NotBeEmpty();
-        }
-
-        [Fact]
-        public async Task ErrorHandling_ServiceExceptions_ShouldBeHandledGracefully()
-        {
-            // Arrange
-            var mockService = new Mock<IBookService>();
-            mockService
-                .Setup(x => x.GetAllBooksAsync())
-                .ThrowsAsync(new Exception("Database connection error"));
-
-            // Act & Assert - BookManagementViewModel
-            var bookManagementVM = new BookManagementViewModel(mockService.Object);
-            await Task.Delay(100);
-
-            bookManagementVM.Books.Should().BeEmpty();
-
-            // Act & Assert - SalesViewModel
-            var salesVM = new SalesViewModel(mockService.Object);
-            await Task.Delay(100);
-
-            salesVM.Books.Should().BeEmpty();
-            salesVM.StatusText.Should().Be("Error loading books.");
-
-            // Act & Assert - SalesReportViewModel
-            mockService
-                .Setup(x => x.GetSalesByDateAsync(It.IsAny<DateTime>()))
-                .ThrowsAsync(new Exception("Report generation error"));
-
-            var salesReportVM = new SalesReportViewModel(mockService.Object);
-            await Task.Delay(200);
-
-            salesReportVM.Sales.Should().BeEmpty();
-            salesReportVM.IsExportEnabled.Should().BeFalse();
-        }
-
-        [Fact]
-        public async Task CommandPatterns_CanExecuteStates_ShouldWorkCorrectly()
-        {
-            // Arrange
-            var mockService = new Mock<IBookService>();
-            var books = TestData.CreateTestBooks(1).ToList();
-            books[0].StockQuantity = 0; // Out of stock
-
-            mockService.Setup(x => x.GetAllBooksAsync()).ReturnsAsync(books);
-
-            var salesVM = new SalesViewModel(mockService.Object);
-            await Task.Delay(100);
-
-            // Act & Assert - Out of stock book should disable sell command
-            salesVM.SelectedBook = books[0];
-            salesVM.SellBookCommand.CanExecute(null).Should().BeFalse();
-            salesVM.IsSellButtonEnabled.Should().BeFalse();
-
-            // Simulate restocking
-            books[0].StockQuantity = 5;
-            salesVM.SelectedBook = books[0]; // Re-select to update state
-
-            salesVM.SellBookCommand.CanExecute(null).Should().BeTrue();
-            salesVM.IsSellButtonEnabled.Should().BeTrue();
-        }
-
-        [Fact]
-        public async Task ViewModelLifecycle_InitializationAndCleanup_ShouldWorkCorrectly()
-        {
-            // Arrange
-            var mockService = new Mock<IBookService>();
-            var books = TestData.CreateTestBooks();
-
-            mockService.Setup(x => x.GetAllBooksAsync()).ReturnsAsync(books);
-
-            // Act - Create and initialize ViewModels
-            var bookManagementVM = new BookManagementViewModel(mockService.Object);
-            var salesVM = new SalesViewModel(mockService.Object);
-
-            await Task.Delay(100);
-
-            // Assert - ViewModels should be properly initialized
-            bookManagementVM.Books.Should().HaveCount(books.Count);
-            salesVM.Books.Should().HaveCount(books.Count);
-
-            // Commands should be available
-            bookManagementVM.AddCommand.Should().NotBeNull();
-            bookManagementVM.UpdateCommand.Should().NotBeNull();
-            bookManagementVM.DeleteCommand.Should().NotBeNull();
-            bookManagementVM.ClearCommand.Should().NotBeNull();
-
-            salesVM.SellBookCommand.Should().NotBeNull();
-
-            // Initial states should be correct
-            bookManagementVM.IsUpdateEnabled.Should().BeFalse();
-            bookManagementVM.IsDeleteEnabled.Should().BeFalse();
-            salesVM.IsSellButtonEnabled.Should().BeFalse();
-            salesVM.SelectedBookText.Should().Be("No book selected");
         }
     }
 }

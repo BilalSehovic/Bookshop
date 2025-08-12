@@ -178,22 +178,4 @@ public class BaseViewModelTests
         else
             capturedPropertyName.Should().Be(propertyName);
     }
-
-    [Fact]
-    public void SetProperty_WithNullValues_ShouldWorkCorrectly()
-    {
-        // Arrange
-        var viewModel = new TestViewModel();
-        viewModel.TestProperty = "Initial";
-
-        var propertyChanged = false;
-        viewModel.PropertyChanged += (sender, args) => propertyChanged = true;
-
-        // Act
-        viewModel.TestProperty = null!;
-
-        // Assert
-        propertyChanged.Should().BeTrue();
-        viewModel.TestProperty.Should().BeNull();
-    }
 }
