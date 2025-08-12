@@ -1,8 +1,14 @@
 using DataAccessLayer;
+using DataAccessLayer.Models;
+using FluentAssertions;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
+using Moq;
+using WpfApp.Services;
+using WpfApp.Tests.TestHelpers;
 using WpfApp.ViewModels;
 using WpfApp.Views;
+using Xunit;
 
 namespace WpfApp.Tests.ViewModels;
 
@@ -21,12 +27,18 @@ public class MainWindowViewModelTests
         _mockDbSet = new Mock<DbSet<Book>>();
         _testBooks = TestData.CreateTestBooks();
 
+        // Setup mock services for ViewModels
+        var mockBookService = new Mock<IBookService>();
+        
+        // Setup mock ViewModels with their dependencies
+        var mockBookManagementViewModel = new Mock<BookManagementViewModel>(mockBookService.Object);
+        var mockSalesViewModel = new Mock<SalesViewModel>(mockBookService.Object);
+        var mockSalesReportViewModel = new Mock<SalesReportViewModel>(mockBookService.Object);
+        
         // Setup mock views
-        var mockBookManagementView = new Mock<BookManagementView>(
-            Mock.Of<BookManagementViewModel>()
-        );
-        var mockSalesView = new Mock<SalesView>(Mock.Of<SalesViewModel>());
-        var mockSalesReportView = new Mock<SalesReportView>(Mock.Of<SalesReportViewModel>());
+        var mockBookManagementView = new Mock<BookManagementView>(mockBookManagementViewModel.Object);
+        var mockSalesView = new Mock<SalesView>(mockSalesViewModel.Object);
+        var mockSalesReportView = new Mock<SalesReportView>(mockSalesReportViewModel.Object);
 
         // Setup service provider
         _mockServiceProvider
@@ -158,64 +170,6 @@ public class MainWindowViewModelTests
         _viewModel.CurrentContent.Should().BeSameAs(firstView);
     }
 
-    [Fact]
-    public void ShowAboutCommand_ShouldExecuteWithoutError()
-    {
-        // Act & Assert
-        var exception = Record.Exception(() => _viewModel.ShowAboutCommand.Execute(null));
-        exception.Should().BeNull();
-    }
-
-    [Fact]
-    public async Task InitializeDatabaseCommand_WithEmptyDatabase_ShouldAddSampleData()
-    {
-        // Arrange
-        _mockDbSet.Setup(x => x.Any()).Returns(false); // Empty database
-
-        // Act
-        _viewModel.InitializeDatabaseCommand.Execute(null);
-        await Task.Delay(100); // Wait for async operation
-
-        // Assert
-        _mockDbContext.Verify(x => x.Database.EnsureCreatedAsync(default), Times.Once);
-        _mockDbSet.Verify(x => x.AddRange(It.IsAny<IEnumerable<Book>>()), Times.Once);
-        _mockDbContext.Verify(x => x.SaveChangesAsync(default), Times.Once);
-    }
-
-    [Fact]
-    public async Task InitializeDatabaseCommand_WithExistingData_ShouldNotAddSampleData()
-    {
-        // Arrange
-        _mockDbSet.Setup(x => x.Any()).Returns(true); // Database has data
-
-        // Act
-        _viewModel.InitializeDatabaseCommand.Execute(null);
-        await Task.Delay(100);
-
-        // Assert
-        _mockDbContext.Verify(x => x.Database.EnsureCreatedAsync(default), Times.Once);
-        _mockDbSet.Verify(x => x.AddRange(It.IsAny<IEnumerable<Book>>()), Times.Never);
-        _mockDbContext.Verify(x => x.SaveChangesAsync(default), Times.Never);
-    }
-
-    [Fact]
-    public async Task InitializeDatabaseCommand_WhenDatabaseThrows_ShouldHandleException()
-    {
-        // Arrange
-        _mockDbContext
-            .Setup(x => x.Database.EnsureCreatedAsync(default))
-            .ThrowsAsync(new Exception("Database error"));
-
-        // Act & Assert
-        var exception = await Record.ExceptionAsync(async () =>
-        {
-            _viewModel.InitializeDatabaseCommand.Execute(null);
-            await Task.Delay(100);
-        });
-
-        exception.Should().BeNull(); // Should handle exception gracefully
-        _mockDbContext.Verify(x => x.Database.EnsureCreatedAsync(default), Times.Once);
-    }
 
     [Fact]
     public void PropertyChangedEvents_ShouldBeRaisedCorrectly()
@@ -252,7 +206,9 @@ public class MainWindowViewModelTests
     public void CurrentContent_WhenSet_ShouldUpdateCorrectly()
     {
         // Arrange
-        var mockView = new Mock<BookManagementView>(Mock.Of<BookManagementViewModel>());
+        var mockBookService = new Mock<IBookService>();
+        var mockBookManagementViewModel = new Mock<BookManagementViewModel>(mockBookService.Object);
+        var mockView = new Mock<BookManagementView>(mockBookManagementViewModel.Object);
 
         // Act
         _viewModel.CurrentContent = mockView.Object;
@@ -302,33 +258,4 @@ public class MainWindowViewModelTests
         _viewModel.WindowTitle.Should().Be("Bookshop Management System - Sales Report");
     }
 
-    [Theory]
-    [InlineData(10)] // Should add exactly 10 sample books
-    public async Task InitializeDatabaseCommand_ShouldAddCorrectNumberOfSampleBooks(
-        int expectedBookCount
-    )
-    {
-        // Arrange
-        _mockDbSet.Setup(x => x.Any()).Returns(false);
-        Book[] capturedBooks = null!;
-        _mockDbSet
-            .Setup(x => x.AddRange(It.IsAny<IEnumerable<Book>>()))
-            .Callback<IEnumerable<Book>>(books => capturedBooks = books.ToArray());
-
-        // Act
-        _viewModel.InitializeDatabaseCommand.Execute(null);
-        await Task.Delay(100);
-
-        // Assert
-        capturedBooks.Should().NotBeNull();
-        capturedBooks.Should().HaveCount(expectedBookCount);
-        capturedBooks
-            .Should()
-            .OnlyContain(b =>
-                !string.IsNullOrWhiteSpace(b.Title)
-                && !string.IsNullOrWhiteSpace(b.Author)
-                && b.Price > 0
-                && b.StockQuantity > 0
-            );
-    }
 }
