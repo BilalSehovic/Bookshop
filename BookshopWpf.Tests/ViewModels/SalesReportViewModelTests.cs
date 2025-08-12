@@ -82,9 +82,9 @@ public class SalesReportViewModelTests : IDisposable
     // refactored into a separate testable method if needed.
 
     [Theory]
-    [InlineData("01-01-2024")]
-    [InlineData("31-12-2024")]
-    [InlineData("15-06-2023")]
+    [InlineData("2024-01-01")]
+    [InlineData("2024-12-31")]
+    [InlineData("2023-06-15")]
     public async Task SelectedDate_WithDifferentDates_ShouldFormatCorrectly(string dateString)
     {
         // Arrange
