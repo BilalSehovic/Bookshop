@@ -1,8 +1,14 @@
 using DataAccessLayer;
+using DataAccessLayer.Models;
+using FluentAssertions;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
+using Moq;
+using WpfApp.Services;
+using WpfApp.Tests.TestHelpers;
 using WpfApp.ViewModels;
 using WpfApp.Views;
+using Xunit;
 
 namespace WpfApp.Tests.ViewModels;
 
@@ -21,12 +27,20 @@ public class MainWindowViewModelTests
         _mockDbSet = new Mock<DbSet<Book>>();
         _testBooks = TestData.CreateTestBooks();
 
+        // Setup mock services for ViewModels
+        var mockBookService = new Mock<IBookService>();
+
+        // Setup mock ViewModels with their dependencies
+        var mockBookManagementViewModel = new Mock<BookManagementViewModel>(mockBookService.Object);
+        var mockSalesViewModel = new Mock<SalesViewModel>(mockBookService.Object);
+        var mockSalesReportViewModel = new Mock<SalesReportViewModel>(mockBookService.Object);
+
         // Setup mock views
         var mockBookManagementView = new Mock<BookManagementView>(
-            Mock.Of<BookManagementViewModel>()
+            mockBookManagementViewModel.Object
         );
-        var mockSalesView = new Mock<SalesView>(Mock.Of<SalesViewModel>());
-        var mockSalesReportView = new Mock<SalesReportView>(Mock.Of<SalesReportViewModel>());
+        var mockSalesView = new Mock<SalesView>(mockSalesViewModel.Object);
+        var mockSalesReportView = new Mock<SalesReportView>(mockSalesReportViewModel.Object);
 
         // Setup service provider
         _mockServiceProvider
