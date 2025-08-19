@@ -2,7 +2,6 @@ using System.Collections.ObjectModel;
 using System.Globalization;
 using System.IO;
 using System.Text;
-using System.Windows;
 using System.Windows.Input;
 using DataAccessLayer.Models;
 using Microsoft.Win32;
@@ -13,6 +12,7 @@ namespace WpfApp.ViewModels;
 public class SalesReportViewModel : ViewModelBase
 {
     private readonly IBookService _bookService;
+    private readonly IDialogService _dialogService;
     private DateTime _selectedDate = DateTime.Today;
     private ObservableCollection<Sale> _sales = new();
     private int _totalSales = 0;
@@ -21,9 +21,10 @@ public class SalesReportViewModel : ViewModelBase
     private string _selectedDateText = DateTime.Today.ToString("dd-MM-yyyy");
     private bool _isExportEnabled = false;
 
-    public SalesReportViewModel(IBookService bookService)
+    public SalesReportViewModel(IBookService bookService, IDialogService dialogService)
     {
         _bookService = bookService;
+        _dialogService = dialogService;
         TodayCommand = new RelayCommand(SetToday);
         ExportCsvCommand = new RelayCommand(ExportCsv, () => IsExportEnabled);
         LoadReportCommand = new RelayCommand(async () => await LoadReportAsync());
@@ -112,11 +113,9 @@ public class SalesReportViewModel : ViewModelBase
         }
         catch (Exception ex)
         {
-            MessageBox.Show(
+            await _dialogService.ShowErrorAsync(
                 $"Error loading sales report: {ex.Message}",
-                "Error",
-                MessageBoxButton.OK,
-                MessageBoxImage.Error
+                "Error"
             );
             ClearReport();
         }
@@ -138,15 +137,13 @@ public class SalesReportViewModel : ViewModelBase
         IsExportEnabled = false;
     }
 
-    private void ExportCsv()
+    private async void ExportCsv()
     {
         if (!Sales.Any())
         {
-            MessageBox.Show(
+            await _dialogService.ShowInformationAsync(
                 "No sales data to export.",
-                "No Data",
-                MessageBoxButton.OK,
-                MessageBoxImage.Information
+                "No Data"
             );
             return;
         }
@@ -165,20 +162,16 @@ public class SalesReportViewModel : ViewModelBase
             try
             {
                 ExportToCsv(saveFileDialog.FileName);
-                MessageBox.Show(
+                await _dialogService.ShowInformationAsync(
                     $"Sales report exported successfully to:\n{saveFileDialog.FileName}",
-                    "Export Successful",
-                    MessageBoxButton.OK,
-                    MessageBoxImage.Information
+                    "Export Successful"
                 );
             }
             catch (Exception ex)
             {
-                MessageBox.Show(
+                await _dialogService.ShowErrorAsync(
                     $"Error exporting CSV: {ex.Message}",
-                    "Export Error",
-                    MessageBoxButton.OK,
-                    MessageBoxImage.Error
+                    "Export Error"
                 );
             }
         }
