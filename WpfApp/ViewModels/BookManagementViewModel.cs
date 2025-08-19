@@ -1,4 +1,5 @@
 using System.Collections.ObjectModel;
+using System.Windows;
 using System.Windows.Input;
 using DataAccessLayer.Models;
 using WpfApp.Services;
@@ -8,7 +9,6 @@ namespace WpfApp.ViewModels;
 public class BookManagementViewModel : ViewModelBase
 {
     private readonly IBookService _bookService;
-    private readonly IDialogService _dialogService;
     private ObservableCollection<Book> _books = new();
     private Book? _selectedBook;
     private string _title = "";
@@ -19,10 +19,9 @@ public class BookManagementViewModel : ViewModelBase
     private bool _isUpdateEnabled = false;
     private bool _isDeleteEnabled = false;
 
-    public BookManagementViewModel(IBookService bookService, IDialogService dialogService)
+    public BookManagementViewModel(IBookService bookService)
     {
         _bookService = bookService;
-        _dialogService = dialogService;
         AddCommand = new RelayCommand(async () => await AddBookAsync());
         UpdateCommand = new RelayCommand(
             async () => await UpdateBookAsync(),
@@ -138,9 +137,11 @@ public class BookManagementViewModel : ViewModelBase
         }
         catch (Exception ex)
         {
-            await _dialogService.ShowErrorAsync(
+            MessageBox.Show(
                 $"Error loading books: {ex.Message}",
-                "Error"
+                "Error",
+                MessageBoxButton.OK,
+                MessageBoxImage.Error
             );
         }
     }
@@ -168,7 +169,7 @@ public class BookManagementViewModel : ViewModelBase
 
     private async Task AddBookAsync()
     {
-        if (!await ValidateFormAsync())
+        if (!ValidateForm())
             return;
 
         try
@@ -183,25 +184,29 @@ public class BookManagementViewModel : ViewModelBase
             };
 
             await _bookService.AddBookAsync(book);
-            await _dialogService.ShowInformationAsync(
+            MessageBox.Show(
                 "Book added successfully!",
-                "Success"
+                "Success",
+                MessageBoxButton.OK,
+                MessageBoxImage.Information
             );
             ClearForm();
             await LoadBooksAsync();
         }
         catch (Exception ex)
         {
-            await _dialogService.ShowErrorAsync(
+            MessageBox.Show(
                 $"Error adding book: {ex.Message}",
-                "Error"
+                "Error",
+                MessageBoxButton.OK,
+                MessageBoxImage.Error
             );
         }
     }
 
     private async Task UpdateBookAsync()
     {
-        if (SelectedBook == null || !await ValidateFormAsync())
+        if (SelectedBook == null || !ValidateForm())
             return;
 
         try
@@ -213,18 +218,22 @@ public class BookManagementViewModel : ViewModelBase
             SelectedBook.StockQuantity = int.Parse(Stock);
 
             await _bookService.UpdateBookAsync(SelectedBook);
-            await _dialogService.ShowInformationAsync(
+            MessageBox.Show(
                 "Book updated successfully!",
-                "Success"
+                "Success",
+                MessageBoxButton.OK,
+                MessageBoxImage.Information
             );
             ClearForm();
             await LoadBooksAsync();
         }
         catch (Exception ex)
         {
-            await _dialogService.ShowErrorAsync(
+            MessageBox.Show(
                 $"Error updating book: {ex.Message}",
-                "Error"
+                "Error",
+                MessageBoxButton.OK,
+                MessageBoxImage.Error
             );
         }
     }
@@ -234,76 +243,92 @@ public class BookManagementViewModel : ViewModelBase
         if (SelectedBook == null)
             return;
 
-        var result = await _dialogService.ShowConfirmationAsync(
+        var result = MessageBox.Show(
             $"Are you sure you want to delete '{SelectedBook.Title}'?",
-            "Confirm Delete"
+            "Confirm Delete",
+            MessageBoxButton.YesNo,
+            MessageBoxImage.Question
         );
 
-        if (result)
+        if (result == MessageBoxResult.Yes)
         {
             try
             {
                 await _bookService.DeleteBookAsync(SelectedBook.Id);
-                await _dialogService.ShowInformationAsync(
+                MessageBox.Show(
                     "Book deleted successfully!",
-                    "Success"
+                    "Success",
+                    MessageBoxButton.OK,
+                    MessageBoxImage.Information
                 );
                 ClearForm();
                 await LoadBooksAsync();
             }
             catch (Exception ex)
             {
-                await _dialogService.ShowErrorAsync(
+                MessageBox.Show(
                     $"Error deleting book: {ex.Message}",
-                    "Error"
+                    "Error",
+                    MessageBoxButton.OK,
+                    MessageBoxImage.Error
                 );
             }
         }
     }
 
-    private async Task<bool> ValidateFormAsync()
+    private bool ValidateForm()
     {
         if (string.IsNullOrWhiteSpace(Title))
         {
-            await _dialogService.ShowWarningAsync(
+            MessageBox.Show(
                 "Title is required.",
-                "Validation Error"
+                "Validation Error",
+                MessageBoxButton.OK,
+                MessageBoxImage.Warning
             );
             return false;
         }
 
         if (string.IsNullOrWhiteSpace(Author))
         {
-            await _dialogService.ShowWarningAsync(
+            MessageBox.Show(
                 "Author is required.",
-                "Validation Error"
+                "Validation Error",
+                MessageBoxButton.OK,
+                MessageBoxImage.Warning
             );
             return false;
         }
 
         if (string.IsNullOrWhiteSpace(Isbn))
         {
-            await _dialogService.ShowWarningAsync(
+            MessageBox.Show(
                 "ISBN is required.",
-                "Validation Error"
+                "Validation Error",
+                MessageBoxButton.OK,
+                MessageBoxImage.Warning
             );
             return false;
         }
 
         if (!double.TryParse(Price, out double price) || price <= 0)
         {
-            await _dialogService.ShowWarningAsync(
+            MessageBox.Show(
                 "Please enter a valid price.",
-                "Validation Error"
+                "Validation Error",
+                MessageBoxButton.OK,
+                MessageBoxImage.Warning
             );
             return false;
         }
 
         if (!int.TryParse(Stock, out int stock) || stock < 0)
         {
-            await _dialogService.ShowWarningAsync(
+            MessageBox.Show(
                 "Please enter a valid stock quantity.",
-                "Validation Error"
+                "Validation Error",
+                MessageBoxButton.OK,
+                MessageBoxImage.Warning
             );
             return false;
         }

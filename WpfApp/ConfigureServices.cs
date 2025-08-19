@@ -21,7 +21,6 @@ public static class ConfigureServices
 
         // Services
         services.AddScoped<IBookService, BookService>();
-        services.AddSingleton<IDialogService, DialogService>();
 
         // ViewModels
         services.AddTransient<MainWindowViewModel>();
