@@ -1,3 +1,5 @@
+using BookshopWpf.Tests.Helpers;
+using WpfApp.Interfaces;
 using WpfApp.Services;
 using WpfApp.ViewModels;
 
@@ -6,17 +8,22 @@ namespace WpfApp.Tests.ViewModels;
 public class BookManagementViewModelTests
 {
     private readonly Mock<IBookService> _mockBookService;
+    private readonly Mock<IDialogService> _mockDialogService;
     private readonly BookManagementViewModel _viewModel;
     private readonly List<Book> _testBooks;
 
     public BookManagementViewModelTests()
     {
-        _mockBookService = new Mock<IBookService>();
+        _mockBookService = ServicesMoqHelper.GetBookServiceMock();
+        _mockDialogService = ServicesMoqHelper.GetDialogServiceMock();
         _testBooks = TestData.CreateTestBooks();
 
         _mockBookService.Setup(x => x.GetAllBooksAsync()).ReturnsAsync(_testBooks);
 
-        _viewModel = new BookManagementViewModel(_mockBookService.Object);
+        _viewModel = new BookManagementViewModel(
+            _mockBookService.Object,
+            _mockDialogService.Object
+        );
 
         // Wait for initial load to complete
         Task.Delay(100).Wait();

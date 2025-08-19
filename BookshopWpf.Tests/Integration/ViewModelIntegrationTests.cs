@@ -1,3 +1,4 @@
+using BookshopWpf.Tests.Helpers;
 using WpfApp.Services;
 using WpfApp.ViewModels;
 
@@ -12,22 +13,14 @@ namespace WpfApp.Tests.Integration
         public async Task BookManagementViewModel_AddUpdateDelete_ShouldWorkTogether()
         {
             // Arrange
-            var mockService = new Mock<IBookService>();
-            var books = TestData.CreateTestBooks(2).ToList();
+            var mockBookService = ServicesMoqHelper.GetBookServiceMock();
+            var mockDialogService = ServicesMoqHelper.GetDialogServiceMock();
             var newBook = TestData.CreateTestBook("New Book");
 
-            mockService.Setup(x => x.GetAllBooksAsync()).ReturnsAsync(books);
-            mockService
-                .Setup(x => x.AddBookAsync(It.IsAny<Book>()))
-                .ReturnsAsync(newBook)
-                .Callback<Book>(b => books.Add(b));
-            mockService.Setup(x => x.UpdateBookAsync(It.IsAny<Book>())).ReturnsAsync(newBook);
-            mockService
-                .Setup(x => x.DeleteBookAsync(It.IsAny<Guid>()))
-                .ReturnsAsync(true)
-                .Callback<Guid>(id => books.RemoveAll(b => b.Id == id));
-
-            var viewModel = new BookManagementViewModel(mockService.Object);
+            var viewModel = new BookManagementViewModel(
+                mockBookService.Object,
+                mockDialogService.Object
+            );
             await Task.Delay(100); // Wait for initial load
 
             // Test Add functionality
@@ -56,25 +49,26 @@ namespace WpfApp.Tests.Integration
             await Task.Delay(100);
 
             // Assert
-            mockService.Verify(x => x.AddBookAsync(It.IsAny<Book>()), Times.Once);
-            mockService.Verify(x => x.UpdateBookAsync(It.IsAny<Book>()), Times.Once);
-            mockService.Verify(x => x.DeleteBookAsync(It.IsAny<Guid>()), Times.Once);
+            mockBookService.Verify(x => x.AddBookAsync(It.IsAny<Book>()), Times.Once);
+            mockBookService.Verify(x => x.UpdateBookAsync(It.IsAny<Book>()), Times.Once);
+            mockBookService.Verify(x => x.DeleteBookAsync(It.IsAny<Guid>()), Times.Once);
         }
 
         [Fact]
         public async Task SalesViewModel_LoadBooksAndSell_ShouldWorkTogether()
         {
             // Arrange
-            var mockService = new Mock<IBookService>();
+            var mockBookService = new Mock<IBookService>();
+            var mockDialogService = ServicesMoqHelper.GetDialogServiceMock();
             var books = TestData.CreateTestBooks(3).ToList();
             var bookToSell = books.First();
 
-            mockService.Setup(x => x.GetAllBooksAsync()).ReturnsAsync(books);
-            mockService
+            mockBookService.Setup(x => x.GetAllBooksAsync()).ReturnsAsync(books);
+            mockBookService
                 .Setup(x => x.SellBookAsync(bookToSell.Id, It.IsAny<double>(), It.IsAny<int>()))
                 .ReturnsAsync(true);
 
-            var viewModel = new SalesViewModel(mockService.Object);
+            var viewModel = new SalesViewModel(mockBookService.Object, mockDialogService.Object);
             await Task.Delay(100);
 
             // Act - Select book and sell
@@ -87,22 +81,26 @@ namespace WpfApp.Tests.Integration
 
             // Assert
             viewModel.Books.Should().Contain(bookToSell);
-            mockService.Verify(x => x.GetAllBooksAsync(), Times.AtLeast(2)); // Initial + refresh after sale
-            mockService.Verify(x => x.SellBookAsync(bookToSell.Id, 15.99, 2), Times.Once);
+            mockBookService.Verify(x => x.GetAllBooksAsync(), Times.AtLeast(2)); // Initial + refresh after sale
+            mockBookService.Verify(x => x.SellBookAsync(bookToSell.Id, 15.99, 2), Times.Once);
         }
 
         [Fact]
         public async Task SalesReportViewModel_LoadAndExportWorkflow_ShouldWorkTogether()
         {
             // Arrange
-            var mockService = new Mock<IBookService>();
+            var mockBookService = new Mock<IBookService>();
+            var mockDialogService = ServicesMoqHelper.GetDialogServiceMock();
             var initialBooks = TestData.CreateTestBooks(3).ToList();
             var sales = TestData.CreateTestSales(initialBooks, 5);
             var testDate = DateTime.Today;
 
-            mockService.Setup(x => x.GetSalesByDateAsync(testDate)).ReturnsAsync(sales);
+            mockBookService.Setup(x => x.GetSalesByDateAsync(testDate)).ReturnsAsync(sales);
 
-            var viewModel = new SalesReportViewModel(mockService.Object);
+            var viewModel = new SalesReportViewModel(
+                mockBookService.Object,
+                mockDialogService.Object
+            );
             await Task.Delay(200);
 
             // Act - Change date and verify data loads
@@ -120,27 +118,39 @@ namespace WpfApp.Tests.Integration
             viewModel.TotalRevenue.Should().Be(sales.Sum(s => s.UnitPrice * s.Quantity));
             viewModel.IsExportEnabled.Should().BeTrue();
 
-            mockService.Verify(x => x.GetSalesByDateAsync(It.IsAny<DateTime>()), Times.AtLeast(2));
+            mockBookService.Verify(
+                x => x.GetSalesByDateAsync(It.IsAny<DateTime>()),
+                Times.AtLeast(2)
+            );
         }
 
         [Fact]
         public async Task CrossViewModel_DataConsistency_ShouldMaintainState()
         {
             // Arrange - Shared service instance
-            var mockService = new Mock<IBookService>();
+            var mockBookService = new Mock<IBookService>();
+            var mockDialogService = ServicesMoqHelper.GetDialogServiceMock();
             var initialBooks = TestData.CreateTestBooks(3).ToList();
             var sales = TestData.CreateTestSales(initialBooks);
 
-            mockService.Setup(x => x.GetAllBooksAsync()).ReturnsAsync(initialBooks);
-            mockService.Setup(x => x.GetSalesByDateAsync(It.IsAny<DateTime>())).ReturnsAsync(sales);
-            mockService
+            mockBookService.Setup(x => x.GetAllBooksAsync()).ReturnsAsync(initialBooks);
+            mockBookService
+                .Setup(x => x.GetSalesByDateAsync(It.IsAny<DateTime>()))
+                .ReturnsAsync(sales);
+            mockBookService
                 .Setup(x => x.SellBookAsync(It.IsAny<Guid>(), It.IsAny<double>(), It.IsAny<int>()))
                 .ReturnsAsync(true);
 
             // Create multiple ViewModels using the same service
-            var bookManagementVM = new BookManagementViewModel(mockService.Object);
-            var salesVM = new SalesViewModel(mockService.Object);
-            var salesReportVM = new SalesReportViewModel(mockService.Object);
+            var bookManagementVM = new BookManagementViewModel(
+                mockBookService.Object,
+                mockDialogService.Object
+            );
+            var salesVM = new SalesViewModel(mockBookService.Object, mockDialogService.Object);
+            var salesReportVM = new SalesReportViewModel(
+                mockBookService.Object,
+                mockDialogService.Object
+            );
 
             await Task.Delay(200); // Wait for initial loads
 
@@ -159,9 +169,12 @@ namespace WpfApp.Tests.Integration
             await Task.Delay(200);
 
             // Assert - All ViewModels should reflect the updated state
-            mockService.Verify(x => x.GetAllBooksAsync(), Times.AtLeast(4)); // Multiple refreshes
-            mockService.Verify(x => x.SellBookAsync(It.IsAny<Guid>(), 19.99, 1), Times.Once);
-            mockService.Verify(x => x.GetSalesByDateAsync(It.IsAny<DateTime>()), Times.AtLeast(2));
+            mockBookService.Verify(x => x.GetAllBooksAsync(), Times.AtLeast(4)); // Multiple refreshes
+            mockBookService.Verify(x => x.SellBookAsync(It.IsAny<Guid>(), 19.99, 1), Times.Once);
+            mockBookService.Verify(
+                x => x.GetSalesByDateAsync(It.IsAny<DateTime>()),
+                Times.AtLeast(2)
+            );
 
             // All ViewModels should be working with consistent data
             bookManagementVM.Books.Should().NotBeEmpty();

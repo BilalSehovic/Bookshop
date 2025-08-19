@@ -1,4 +1,6 @@
 using System.IO;
+using BookshopWpf.Tests.Helpers;
+using WpfApp.Interfaces;
 using WpfApp.Services;
 using WpfApp.ViewModels;
 
@@ -7,13 +9,15 @@ namespace WpfApp.Tests.ViewModels;
 public class SalesReportViewModelTests : IDisposable
 {
     private readonly Mock<IBookService> _mockBookService;
+    private readonly Mock<IDialogService> _mockDialogService;
     private readonly SalesReportViewModel _viewModel;
     private readonly List<Sale> _testSales;
     private readonly List<string> _tempFiles;
 
     public SalesReportViewModelTests()
     {
-        _mockBookService = new Mock<IBookService>();
+        _mockBookService = ServicesMoqHelper.GetBookServiceMock();
+        _mockDialogService = ServicesMoqHelper.GetDialogServiceMock();
         _testSales = TestData.CreateTestSales();
         _tempFiles = new List<string>();
 
@@ -22,7 +26,7 @@ public class SalesReportViewModelTests : IDisposable
             .Setup(x => x.GetSalesByDateAsync(It.IsAny<DateTime>()))
             .ReturnsAsync(_testSales);
 
-        _viewModel = new SalesReportViewModel(_mockBookService.Object);
+        _viewModel = new SalesReportViewModel(_mockBookService.Object, _mockDialogService.Object);
 
         // Wait for initial load
         Task.Delay(200).Wait();
@@ -116,7 +120,10 @@ public class SalesReportViewModelTests : IDisposable
             .ReturnsAsync(complexSales);
 
         // Act
-        var viewModel = new SalesReportViewModel(_mockBookService.Object);
+        var viewModel = new SalesReportViewModel(
+            _mockBookService.Object,
+            _mockDialogService.Object
+        );
         Task.Delay(200).Wait();
 
         // Assert
