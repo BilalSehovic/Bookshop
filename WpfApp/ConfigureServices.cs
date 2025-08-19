@@ -3,6 +3,7 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
+using WpfApp.Interfaces;
 using WpfApp.Services;
 using WpfApp.ViewModels;
 using WpfApp.Views;
@@ -21,6 +22,7 @@ public static class ConfigureServices
 
         // Services
         services.AddScoped<IBookService, BookService>();
+        services.AddScoped<IDialogService, DialogService>();
 
         // ViewModels
         services.AddTransient<MainWindowViewModel>();

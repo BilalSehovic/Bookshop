@@ -1,7 +1,7 @@
 using System.Collections.ObjectModel;
-using System.Windows;
 using System.Windows.Input;
 using DataAccessLayer.Models;
+using WpfApp.Interfaces;
 using WpfApp.Services;
 
 namespace WpfApp.ViewModels;
@@ -9,6 +9,7 @@ namespace WpfApp.ViewModels;
 public class SalesViewModel : ViewModelBase
 {
     private readonly IBookService _bookService;
+    private readonly IDialogService _dialogService;
     private ObservableCollection<Book> _books = new();
     private Book? _selectedBook;
     private string _selectedBookText = "No book selected";
@@ -17,9 +18,10 @@ public class SalesViewModel : ViewModelBase
     private bool _isSellButtonEnabled = false;
     private string _statusText = "Select a book to sell.";
 
-    public SalesViewModel(IBookService bookService)
+    public SalesViewModel(IBookService bookService, IDialogService dialogService)
     {
         _bookService = bookService;
+        _dialogService = dialogService;
         SellBookCommand = new RelayCommand(
             async () => await SellBookAsync(),
             () => IsSellButtonEnabled
@@ -109,12 +111,7 @@ public class SalesViewModel : ViewModelBase
         }
         catch (Exception ex)
         {
-            MessageBox.Show(
-                $"Error loading books: {ex.Message}",
-                "Error",
-                MessageBoxButton.OK,
-                MessageBoxImage.Error
-            );
+            _dialogService.ShowError($"Error loading books: {ex.Message}", "Error");
             StatusText = "Error loading books.";
         }
     }
@@ -149,57 +146,41 @@ public class SalesViewModel : ViewModelBase
     {
         if (SelectedBook == null)
         {
-            MessageBox.Show(
-                "Please select a book to sell.",
-                "No Selection",
-                MessageBoxButton.OK,
-                MessageBoxImage.Warning
-            );
+            _dialogService.ShowWarning("Please select a book to sell.", "No Selection");
             return;
         }
 
         if (!double.TryParse(SalePriceText, out double salePrice) || salePrice <= 0)
         {
-            MessageBox.Show(
-                "Please enter a valid sale price.",
-                "Invalid Price",
-                MessageBoxButton.OK,
-                MessageBoxImage.Warning
-            );
+            _dialogService.ShowWarning("Please enter a valid sale price.", "Invalid Price");
             return;
         }
 
         if (!int.TryParse(QuantityText, out int quantity) || quantity <= 0)
         {
-            MessageBox.Show(
+            _dialogService.ShowWarning(
                 "Please enter a valid quantity (must be 1 or greater).",
-                "Invalid Quantity",
-                MessageBoxButton.OK,
-                MessageBoxImage.Warning
+                "Invalid Quantity"
             );
             return;
         }
 
         if (quantity > SelectedBook.StockQuantity)
         {
-            MessageBox.Show(
+            _dialogService.ShowWarning(
                 $"Cannot sell {quantity} books. Only {SelectedBook.StockQuantity} in stock.",
-                "Insufficient Stock",
-                MessageBoxButton.OK,
-                MessageBoxImage.Warning
+                "Insufficient Stock"
             );
             return;
         }
 
         var totalPrice = salePrice * quantity;
-        var result = MessageBox.Show(
+        var result = _dialogService.ShowConfirmation(
             $"Confirm sale of:\n\nBook: {SelectedBook.Title}\nAuthor: {SelectedBook.Author}\nQuantity: {quantity}\nPrice per book: {salePrice:C}\nTotal Price: {totalPrice:C}\n\nThis will reduce stock by {quantity}.",
-            "Confirm Sale",
-            MessageBoxButton.YesNo,
-            MessageBoxImage.Question
+            "Confirm Sale"
         );
 
-        if (result == MessageBoxResult.Yes)
+        if (result)
         {
             try
             {
@@ -215,11 +196,9 @@ public class SalesViewModel : ViewModelBase
                 if (success)
                 {
                     var remainingStock = SelectedBook.StockQuantity - quantity;
-                    MessageBox.Show(
+                    _dialogService.ShowInformation(
                         $"Book sold successfully!\n\nTitle: {SelectedBook.Title}\nQuantity Sold: {quantity}\nPrice per book: {salePrice:C}\nTotal Sale: {totalPrice:C}\nRemaining Stock: {remainingStock}",
-                        "Sale Complete",
-                        MessageBoxButton.OK,
-                        MessageBoxImage.Information
+                        "Sale Complete"
                     );
 
                     ClearSelection();
@@ -227,23 +206,16 @@ public class SalesViewModel : ViewModelBase
                 }
                 else
                 {
-                    MessageBox.Show(
+                    _dialogService.ShowError(
                         "Sale failed. The book may be out of stock or no longer available.",
-                        "Sale Failed",
-                        MessageBoxButton.OK,
-                        MessageBoxImage.Error
+                        "Sale Failed"
                     );
                     await LoadAvailableBooksAsync();
                 }
             }
             catch (Exception ex)
             {
-                MessageBox.Show(
-                    $"Error processing sale: {ex.Message}",
-                    "Error",
-                    MessageBoxButton.OK,
-                    MessageBoxImage.Error
-                );
+                _dialogService.ShowError($"Error processing sale: {ex.Message}", "Error");
                 IsSellButtonEnabled = true;
                 StatusText = "Sale failed.";
             }

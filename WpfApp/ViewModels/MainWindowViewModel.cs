@@ -1,8 +1,8 @@
-using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Input;
 using DataAccessLayer;
 using Microsoft.Extensions.DependencyInjection;
+using WpfApp.Interfaces;
 using WpfApp.Views;
 
 namespace WpfApp.ViewModels;
@@ -10,16 +10,17 @@ namespace WpfApp.ViewModels;
 public class MainWindowViewModel : ViewModelBase
 {
     private readonly IServiceProvider _serviceProvider;
+    private readonly IDialogService _dialogService;
     private UserControl? _currentContent;
     private string _windowTitle = "Bookshop Management System";
     private BookManagementView? _bookManagementView;
     private SalesView? _salesView;
     private SalesReportView? _salesReportView;
 
-    public MainWindowViewModel(IServiceProvider serviceProvider)
+    public MainWindowViewModel(IServiceProvider serviceProvider, IDialogService dialogService)
     {
         _serviceProvider = serviceProvider;
-
+        _dialogService = dialogService;
         LoadBookManagementCommand = new RelayCommand(LoadBookManagement);
         LoadSalesCommand = new RelayCommand(LoadSales);
         LoadSalesReportCommand = new RelayCommand(LoadSalesReport);
@@ -83,14 +84,12 @@ public class MainWindowViewModel : ViewModelBase
 
     private async Task InitializeDatabaseAsync()
     {
-        var result = MessageBox.Show(
+        var result = _dialogService.ShowConfirmation(
             "This will initialize the database and create sample data. Continue?",
-            "Initialize Database",
-            MessageBoxButton.YesNo,
-            MessageBoxImage.Question
+            "Initialize Database"
         );
 
-        if (result == MessageBoxResult.Yes)
+        if (result)
         {
             try
             {
@@ -102,12 +101,7 @@ public class MainWindowViewModel : ViewModelBase
                     await AddSampleData(dbContext);
                 }
 
-                MessageBox.Show(
-                    "Database initialized successfully!",
-                    "Success",
-                    MessageBoxButton.OK,
-                    MessageBoxImage.Information
-                );
+                _dialogService.ShowInformation("Database initialized successfully!", "Success");
 
                 // Reset views to refresh with new data
                 _bookManagementView = null;
@@ -117,12 +111,7 @@ public class MainWindowViewModel : ViewModelBase
             }
             catch (Exception ex)
             {
-                MessageBox.Show(
-                    $"Error initializing database: {ex.Message}",
-                    "Error",
-                    MessageBoxButton.OK,
-                    MessageBoxImage.Error
-                );
+                _dialogService.ShowError($"Error initializing database: {ex.Message}", "Error");
             }
         }
     }
@@ -137,11 +126,9 @@ public class MainWindowViewModel : ViewModelBase
 
     private void ShowAbout()
     {
-        MessageBox.Show(
+        _dialogService.ShowInformation(
             "Bookshop Management System\n\nVersion 1.0\n\nA simple WPF application for managing book inventory and sales.\n\nFeatures:\n• Book Management (Add, Edit, Delete)\n• Sales Processing\n• Sales Reporting\n\nBuilt with C# WPF, Entity Framework Core, and PostgreSQL.",
-            "About Bookshop Management System",
-            MessageBoxButton.OK,
-            MessageBoxImage.Information
+            "About Bookshop Management System"
         );
     }
 }
